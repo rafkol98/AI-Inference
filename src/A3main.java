@@ -25,8 +25,10 @@ public class A3main {
         switch(args[0]) {
             case "P1": {
                 //construct the network in args[1]
-                System.out.println("Network "+args[1]);
+//                System.out.println("Network "+args[1]);
                 //print the network
+                CPT cptex = new CPT("A");
+                cptex.printCPT(3);
             }break;
 
             case "P2":  {
