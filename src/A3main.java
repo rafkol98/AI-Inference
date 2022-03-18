@@ -27,8 +27,10 @@ public class A3main {
                 //construct the network in args[1]
 //                System.out.println("Network "+args[1]);
                 //print the network
-                CPT cptex = new CPT("A");
-                cptex.printCPT(3);
+                CPT cptex = new CPT("A", 0.95,0.05);
+                cptex.printCPT();
+
+                CPT cptex2 = new CPT(new ArrayList<>(), 0.95,0.05);
             }break;
 
             case "P2":  {
