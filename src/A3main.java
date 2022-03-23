@@ -20,56 +20,62 @@ public class A3main {
 
     public static void main(String[] args) {
 
-        Scanner sc=new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
 
-        switch(args[0]) {
+        switch (args[0]) {
             case "P1": {
-                //construct the network in args[1]
+                // Construct the network in args[1].
                 BayesianNetwork bn = getNetwork(args[1]);
+                // Print the network.
                 bn.printNetwork();
 
-                //print the network
 
+            }
+            break;
 
+            case "P2": {
+                // Construct the network in args[1].
+                BayesianNetwork bn = getNetwork(args[1]);
+                VariableElimination ve = new VariableElimination(bn, )
 
-            }break;
+//                //construct the network in args[1]
+//                String[] query=getQueriedNode(sc);
+//                String variable=query[0];
+//                String value=query[1];
+//                String[] order=getOrder(sc);
+//                // execute query of p(variable=value) with given order of elimination
+//                double result=0.570501;
+//                printResult(result);
+            }
+            break;
 
-            case "P2":  {
+            case "P3": {
                 //construct the network in args[1]
-                String[] query=getQueriedNode(sc);
-                String variable=query[0];
-                String value=query[1];
-                String[] order=getOrder(sc);
-                // execute query of p(variable=value) with given order of elimination
-                double result=0.570501;
-                printResult(result);
-            }break;
-
-            case "P3":{
-                //construct the network in args[1]
-                String[] query=getQueriedNode(sc);
-                String variable=query[0];
-                String value=query[1];
-                String[] order=getOrder(sc);
-                ArrayList<String[]> evidence=getEvidence(sc);
+                String[] query = getQueriedNode(sc);
+                String variable = query[0];
+                String value = query[1];
+                String[] order = getOrder(sc);
+                ArrayList<String[]> evidence = getEvidence(sc);
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result=0.570501;
+                double result = 0.570501;
                 printResult(result);
-            }break;
+            }
+            break;
 
-            case "P4":{
+            case "P4": {
                 //construct the network in args[1]
-                String[] query=getQueriedNode(sc);
-                String variable=query[0];
-                String value=query[1];
-                String order=  "A,B";
-                ArrayList<String[]> evidence=getEvidence(sc);
+                String[] query = getQueriedNode(sc);
+                String variable = query[0];
+                String value = query[1];
+                String order = "A,B";
+                ArrayList<String[]> evidence = getEvidence(sc);
                 // execute query of p(variable=value|evidence) with given order of elimination
                 //print the order
                 System.out.println(order);
-                double result=0.570501;
+                double result = 0.570501;
                 printResult(result);
-            }break;
+            }
+            break;
         }
         sc.close();
     }
@@ -78,11 +84,11 @@ public class A3main {
     private static ArrayList<String[]> getEvidence(Scanner sc) {
 
         System.out.println("Evidence:");
-        ArrayList<String[]> evidence=new ArrayList<String[]>();
-        String[] line=sc.nextLine().split(" ");
+        ArrayList<String[]> evidence = new ArrayList<String[]>();
+        String[] line = sc.nextLine().split(" ");
 
-        for(String st:line) {
-            String[] ev=st.split(":");
+        for (String st : line) {
+            String[] ev = st.split(":");
             evidence.add(ev);
         }
         return evidence;
@@ -92,7 +98,7 @@ public class A3main {
     private static String[] getOrder(Scanner sc) {
 
         System.out.println("Order:");
-        String[] val=sc.nextLine().split(",");
+        String[] val = sc.nextLine().split(",");
         return val;
     }
 
@@ -101,7 +107,7 @@ public class A3main {
     private static String[] getQueriedNode(Scanner sc) {
 
         System.out.println("Query:");
-        String[] val=sc.nextLine().split(":");
+        String[] val = sc.nextLine().split(":");
 
         return val;
 
@@ -122,18 +128,18 @@ public class A3main {
 
             case "BNB":
                 // Add nodes with their cpt tables.
-                Node j = bn.addNode("J", 0.05,0.95);
-                Node k = bn.addNode("K", 0.3,0.7,0.1,0.9);
-                Node l = bn.addNode("L", 0.7,0.3);
+                Node j = bn.addNode("J", 0.05, 0.95);
+                Node k = bn.addNode("K", 0.3, 0.7, 0.1, 0.9);
+                Node l = bn.addNode("L", 0.7, 0.3);
                 Node m = bn.addNode("M", 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
                 Node n = bn.addNode("N", 0.8, 0.2, 0.4, 0.6);
                 Node o = bn.addNode("O", 0.2, 0.8, 0.95, 0.05);
                 // Add Edges
                 bn.addEdge(j, k);
                 bn.addEdge(k, m);
-                bn.addEdge(l,m);
+                bn.addEdge(l, m);
                 bn.addEdge(m, n);
-                bn.addEdge(m,o);
+                bn.addEdge(m, o);
         }
 
         return bn;

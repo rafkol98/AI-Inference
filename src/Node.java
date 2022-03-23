@@ -16,7 +16,9 @@ public class Node {
         parents = new ArrayList<>();
         children = new ArrayList<>();
         this.label = label;
-        this.cpt = new CPT(vals); // create CPT given the values.
+        ArrayList<Node> nodesForLabels = (ArrayList<Node>) parents.clone();
+        nodesForLabels.add(this);
+        this.cpt = new CPT(nodesForLabels, vals); // create CPT given the values.
     }
 
     public String getLabel() {
@@ -65,6 +67,7 @@ public class Node {
     }
 
     private void printCPTHead() {
+        //TODO use the getNodeLabels in CPT!
         String head = "";
         String parentsStr = "";
         // Add parents in the head string.

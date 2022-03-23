@@ -40,6 +40,10 @@ public class BayesianNetwork {
         }
     }
 
+    public void variableElimination() {
+
+    }
+
 
 
 
