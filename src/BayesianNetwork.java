@@ -4,14 +4,20 @@ public class BayesianNetwork {
     private ArrayList<Node> nodes;
     private ArrayList<Edge> edges;
 
+    public BayesianNetwork() {
+        nodes = new ArrayList<>();
+        edges = new ArrayList<>();
+    }
+
     /**
      * Add a node to the BN.
      * @param label
      * @param vals
      */
-    public void addNode(String label, double ... vals) {
+    public Node addNode(String label, double ... vals) {
         Node node = new Node(label, vals);
         nodes.add(node);
+        return node;
     }
 
     /**
@@ -23,6 +29,9 @@ public class BayesianNetwork {
         Edge edge = new Edge(first, second);
         edges.add(edge);
     }
+
+
+
 
 
 }

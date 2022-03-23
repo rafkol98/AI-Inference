@@ -25,12 +25,27 @@ public class A3main {
         switch(args[0]) {
             case "P1": {
                 //construct the network in args[1]
-//                System.out.println("Network "+args[1]);
                 //print the network
-                CPT cptex = new CPT("A", 0.95,0.05);
-                cptex.printCPT();
 
-                CPT cptex2 = new CPT(new ArrayList<>(), 0.95,0.05);
+                BayesianNetwork bn=new BayesianNetwork();
+                Node j = bn.addNode("J", 0.05,0.95);
+                Node k = bn.addNode("K", 0.3,0.7,0.1,0.9);
+                bn.addEdge(j, k);
+
+                Node l = bn.addNode("L", 0.7,0.3);
+                Node m = bn.addNode("M", 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
+                bn.addEdge(k, m);
+                bn.addEdge(l,m);
+
+                Node n = bn.addNode("N", 0.8, 0.2, 0.4, 0.6);
+                Node o = bn.addNode("O", 0.2, 0.8, 0.95, 0.05);
+                bn.addEdge(m, n);
+                bn.addEdge(m,o);
+
+                m.printCPT();
+
+                System.out.println(m.getChildren());
+
             }break;
 
             case "P2":  {

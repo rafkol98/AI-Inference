@@ -11,6 +11,8 @@ public class Edge {
     public Edge(Node first, Node second) {
         this.first = first;
         this.second = second;
+        second.addParent(first); // add second as parent.
+        first.addChild(second); // add first as child.
     }
 
 
