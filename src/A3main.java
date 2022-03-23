@@ -25,26 +25,12 @@ public class A3main {
         switch(args[0]) {
             case "P1": {
                 //construct the network in args[1]
+                BayesianNetwork bn = getNetwork(args[1]);
+                bn.printNetwork();
+
                 //print the network
 
-                BayesianNetwork bn=new BayesianNetwork();
-                Node j = bn.addNode("J", 0.05,0.95);
-                Node k = bn.addNode("K", 0.3,0.7,0.1,0.9);
-                bn.addEdge(j, k);
 
-                Node l = bn.addNode("L", 0.7,0.3);
-                Node m = bn.addNode("M", 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
-                bn.addEdge(k, m);
-                bn.addEdge(l,m);
-
-                Node n = bn.addNode("N", 0.8, 0.2, 0.4, 0.6);
-                Node o = bn.addNode("O", 0.2, 0.8, 0.95, 0.05);
-                bn.addEdge(m, n);
-                bn.addEdge(m,o);
-
-                m.printCPT();
-
-                System.out.println(m.getChildren());
 
             }break;
 
@@ -126,6 +112,31 @@ public class A3main {
 
         DecimalFormat dd = new DecimalFormat("#0.00000");
         System.out.println(dd.format(result));
+    }
+
+    private static BayesianNetwork getNetwork(String argumentIn) {
+        BayesianNetwork bn = new BayesianNetwork();
+        //construct the network in args[1]
+        switch (argumentIn) {
+            case "BNA":
+
+            case "BNB":
+                // Add nodes with their cpt tables.
+                Node j = bn.addNode("J", 0.05,0.95);
+                Node k = bn.addNode("K", 0.3,0.7,0.1,0.9);
+                Node l = bn.addNode("L", 0.7,0.3);
+                Node m = bn.addNode("M", 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
+                Node n = bn.addNode("N", 0.8, 0.2, 0.4, 0.6);
+                Node o = bn.addNode("O", 0.2, 0.8, 0.95, 0.05);
+                // Add Edges
+                bn.addEdge(j, k);
+                bn.addEdge(k, m);
+                bn.addEdge(l,m);
+                bn.addEdge(m, n);
+                bn.addEdge(m,o);
+        }
+
+        return bn;
     }
 
 }

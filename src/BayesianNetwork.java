@@ -30,6 +30,15 @@ public class BayesianNetwork {
         edges.add(edge);
     }
 
+    /**
+     * Print all the CPT tables in the network.
+     */
+    public void printNetwork() {
+        for (Node node : nodes) {
+            node.printCPT();
+            System.out.println("\n");
+        }
+    }
 
 
 

@@ -64,7 +64,7 @@ public class Node {
         }
     }
 
-    public void printCPTHead() {
+    private void printCPTHead() {
         String head = "";
         String parentsStr = "";
         // Add parents in the head string.
@@ -75,7 +75,6 @@ public class Node {
                 parentsStr += ",";
             }
         }
-//        head += parentsStr;
         head += label + "\t"; // add label in the head string.
         head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
         System.out.println(head);
