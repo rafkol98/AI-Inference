@@ -45,55 +45,6 @@ public class Node {
         children.add(child);
     }
 
-    /**
-     * Print the CPT.
-     */
-    public void printCPT() {
-        // Get the number of nodes in this CPT.
-        int numberNodes = parents.size() > 0 ? parents.size() + 1 : 1;
-
-        int size = (int) Math.pow(2, numberNodes);
-
-        printCPTHead();
-
-        // Create truth tables.
-        for (int i = 0; i < size; i++) {
-            int repeat = numberNodes - Integer.toBinaryString(i).length();
-
-            String truths = "0".repeat(repeat) + Integer.toBinaryString(i);
-
-            for (char c : truths.toCharArray()) {
-                System.out.print(c + "\t");
-            }
-            System.out.println("|" + cpt.getCptValues().get(i));
-
-        }
-    }
-
-    private void printCPTHead() {
-
-//        //TODO use the getNodeLabels in CPT!
-//        String head = "";
-//        String parentsStr = "";
-//        // Add parents in the head string.
-//        for (int i = 0; i < getParents().size(); i++) {
-//            head += getParents().get(i).label + "\t";
-//            parentsStr += getParents().get(i).label;
-//            if (i != getParents().size() - 1) {
-//                parentsStr += ",";
-//            }
-//        }
-//        if (getParents().size() > 0) {
-//            head += label + "\t"; // add label in the head string.
-//            head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
-//            System.out.println(head);
-//        } else {
-//            head += label + "\t";
-//            head +=("| P(" + label+")");
-//            System.out.println(head);
-//        }
-
-    }
 
     @Override
     public String toString() {

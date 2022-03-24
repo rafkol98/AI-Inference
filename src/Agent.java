@@ -67,7 +67,7 @@ public class Agent {
         // iterate through the nodes of the BN.
         for (Node node : bn.getNodes()) {
             factors.add(node.getCpt());
-            node.printCPT(); // print the CPT.
+            node.getCpt().printCPT(); // print the CPT.
             System.out.println("dame"+node.getCpt().getNodeLabels());
         }
         return factors;
@@ -96,9 +96,6 @@ public class Agent {
 //
 //    }
 
-//    public
-
-
     public CPT join(CPT first, CPT second) {
         // collect all the variables without repetition from the two CPT/factors tables.
         ArrayList<String> v1 = variablesBoth(first, second); // variables in both.
@@ -111,9 +108,7 @@ public class Agent {
         combined.addAll(v3);
 
         CPT f3 = new CPT(combined);
-//        first
 
-        //TODO CHANGE
         return f3;
     }
 
