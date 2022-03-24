@@ -36,7 +36,15 @@ public class A3main {
             case "P2": {
                 // Construct the network in args[1].
                 BayesianNetwork bn = getNetwork(args[1]);
-                VariableElimination ve = new VariableElimination(bn, )
+                Node n = bn.getNode("N");
+                ArrayList<String> order = new ArrayList<>();
+                order.add("J");
+                order.add("K");
+                order.add("L");
+                order.add("M");
+                order.add("N");
+                order.add("O");
+                Agent ve = new Agent(bn, n, order);
 
 //                //construct the network in args[1]
 //                String[] query=getQueriedNode(sc);
@@ -128,18 +136,28 @@ public class A3main {
 
             case "BNB":
                 // Add nodes with their cpt tables.
-                Node j = bn.addNode("J", 0.05, 0.95);
-                Node k = bn.addNode("K", 0.3, 0.7, 0.1, 0.9);
-                Node l = bn.addNode("L", 0.7, 0.3);
-                Node m = bn.addNode("M", 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
-                Node n = bn.addNode("N", 0.8, 0.2, 0.4, 0.6);
-                Node o = bn.addNode("O", 0.2, 0.8, 0.95, 0.05);
+                Node j = bn.addNode("J");
+                Node k = bn.addNode("K");
+                Node l = bn.addNode("L");
+                Node m = bn.addNode("M");
+                Node n = bn.addNode("N");
+                Node o = bn.addNode("O");
                 // Add Edges
                 bn.addEdge(j, k);
                 bn.addEdge(k, m);
                 bn.addEdge(l, m);
                 bn.addEdge(m, n);
                 bn.addEdge(m, o);
+
+                // add cpt values.
+                j.addCPTvalues(0.05, 0.95);
+                k.addCPTvalues( 0.3, 0.7, 0.1, 0.9);
+                l.addCPTvalues(0.7, 0.3);
+                m.addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
+                n.addCPTvalues(0.8, 0.2, 0.4, 0.6);
+                o.addCPTvalues(0.2, 0.8, 0.95, 0.05);
+
+
         }
 
         return bn;

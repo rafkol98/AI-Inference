@@ -9,13 +9,25 @@ public class BayesianNetwork {
         edges = new ArrayList<>();
     }
 
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
+    public Node getNode(String label) {
+        for (Node node : nodes) {
+            if (node.getLabel() == label) {
+                return node;
+            }
+        }
+        return null;
+    }
+
     /**
      * Add a node to the BN.
      * @param label
-     * @param vals
      */
-    public Node addNode(String label, double ... vals) {
-        Node node = new Node(label, vals);
+    public Node addNode(String label) {
+        Node node = new Node(label);
         nodes.add(node);
         return node;
     }
@@ -39,12 +51,5 @@ public class BayesianNetwork {
             System.out.println("\n");
         }
     }
-
-    public void variableElimination() {
-
-    }
-
-
-
 
 }

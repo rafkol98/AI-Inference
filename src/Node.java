@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Node {
     private ArrayList<Node> parents;
@@ -12,12 +13,16 @@ public class Node {
      * @param label the label of the node.
      * @param vals  the values to put in the CPT.
      */
-    public Node(String label, double... vals) {
+    public Node(String label) {
         parents = new ArrayList<>();
         children = new ArrayList<>();
         this.label = label;
+    }
+
+    public void addCPTvalues(double... vals) {
         ArrayList<Node> nodesForLabels = (ArrayList<Node>) parents.clone();
         nodesForLabels.add(this);
+        System.out.println("before"+nodesForLabels);
         this.cpt = new CPT(nodesForLabels, vals); // create CPT given the values.
     }
 
@@ -31,6 +36,10 @@ public class Node {
 
     public ArrayList<Node> getChildren() {
         return children;
+    }
+
+    public CPT getCpt() {
+        return cpt;
     }
 
     public void addParent(Node parent) {
@@ -78,15 +87,23 @@ public class Node {
                 parentsStr += ",";
             }
         }
-        head += label + "\t"; // add label in the head string.
-        head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
-        System.out.println(head);
+        if (getParents().size() > 0) {
+            head += label + "\t"; // add label in the head string.
+            head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
+            System.out.println(head);
+        } else {
+            head += label + "\t";
+            head +=("| P(" + label+")");
+            System.out.println(head);
+        }
+
     }
 
     @Override
     public String toString() {
         return "Node{" +
-                label + '\'' +
+                label +
                 '}';
     }
+
 }

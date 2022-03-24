@@ -15,10 +15,17 @@ public class CPT {
     }
 
     public CPT(ArrayList<Node> nodeLabels, double ... values) {
+        this.nodeLabels = new ArrayList<>();
+
         // get the cpt values.
         this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
         // get the node labels.
-        this.nodeLabels = (ArrayList<String>) nodeLabels.stream().map(node -> node.getLabel()).collect(Collectors.toList());
+
+        for (Node node: nodeLabels) {
+            this.nodeLabels.add(node.getLabel());
+        }
+
+        System.out.println("dame"+nodeLabels);
     }
 
 }
