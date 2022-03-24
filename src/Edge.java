@@ -13,6 +13,7 @@ public class Edge {
         this.second = second;
         second.addParent(first); // add second as parent.
         first.addChild(second); // add first as child.
+//        first.
     }
 
 

@@ -68,6 +68,7 @@ public class Agent {
         for (Node node : bn.getNodes()) {
             factors.add(node.getCpt());
             node.printCPT(); // print the CPT.
+            System.out.println("dame"+node.getCpt().getNodeLabels());
         }
         return factors;
     }
@@ -95,7 +96,7 @@ public class Agent {
 //
 //    }
 
-    public 
+//    public
 
 
     public CPT join(CPT first, CPT second) {
@@ -112,7 +113,8 @@ public class Agent {
         CPT f3 = new CPT(combined);
 //        first
 
-
+        //TODO CHANGE
+        return f3;
     }
 
 //    public ArrayList<ArrayList<String>> permutations(ArrayList<CPT> toSumOut) {

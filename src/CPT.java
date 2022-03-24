@@ -3,6 +3,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class CPT {
+    private Node node;
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
 
@@ -20,16 +21,18 @@ public class CPT {
 
     public CPT(Node node) {
         this.nodeLabels = new ArrayList<>();
+        this.node = node;
+    }
+
+    public void addCPTvalues(double ... values) {
         ArrayList<Node> nodesUsedForLabels = new ArrayList<>();
         nodesUsedForLabels.addAll(node.getParents());
         nodesUsedForLabels.add(node);
         // populate node labels ArrayList.
         for (Node n: nodesUsedForLabels) {
+            System.out.println("excuted");
             this.nodeLabels.add(n.getLabel());
         }
-    }
-
-    public void addCPTvalues(double ... values) {
         this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
     }
 

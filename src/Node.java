@@ -19,6 +19,8 @@ public class Node {
         this.cpt = new CPT(this);
     }
 
+
+
     public String getLabel() {
         return label;
     }
@@ -69,26 +71,27 @@ public class Node {
     }
 
     private void printCPTHead() {
-        //TODO use the getNodeLabels in CPT!
-        String head = "";
-        String parentsStr = "";
-        // Add parents in the head string.
-        for (int i = 0; i < getParents().size(); i++) {
-            head += getParents().get(i).label + "\t";
-            parentsStr += getParents().get(i).label;
-            if (i != getParents().size() - 1) {
-                parentsStr += ",";
-            }
-        }
-        if (getParents().size() > 0) {
-            head += label + "\t"; // add label in the head string.
-            head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
-            System.out.println(head);
-        } else {
-            head += label + "\t";
-            head +=("| P(" + label+")");
-            System.out.println(head);
-        }
+
+//        //TODO use the getNodeLabels in CPT!
+//        String head = "";
+//        String parentsStr = "";
+//        // Add parents in the head string.
+//        for (int i = 0; i < getParents().size(); i++) {
+//            head += getParents().get(i).label + "\t";
+//            parentsStr += getParents().get(i).label;
+//            if (i != getParents().size() - 1) {
+//                parentsStr += ",";
+//            }
+//        }
+//        if (getParents().size() > 0) {
+//            head += label + "\t"; // add label in the head string.
+//            head += "| P(" + label + "|" + parentsStr.replaceAll("\\s+", ",") + ")";
+//            System.out.println(head);
+//        } else {
+//            head += label + "\t";
+//            head +=("| P(" + label+")");
+//            System.out.println(head);
+//        }
 
     }
 
