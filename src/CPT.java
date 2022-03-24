@@ -14,18 +14,29 @@ public class CPT {
         return cptValues;
     }
 
-    public CPT(ArrayList<Node> nodeLabels, double ... values) {
-        this.nodeLabels = new ArrayList<>();
-
-        // get the cpt values.
-        this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
-        // get the node labels.
-
-        for (Node node: nodeLabels) {
-            this.nodeLabels.add(node.getLabel());
-        }
-
-        System.out.println("dame"+nodeLabels);
+    public CPT(ArrayList<String> nodeLabels) {
+        this.nodeLabels = nodeLabels;
     }
 
+    public CPT(Node node) {
+        this.nodeLabels = new ArrayList<>();
+        ArrayList<Node> nodesUsedForLabels = new ArrayList<>();
+        nodesUsedForLabels.addAll(node.getParents());
+        nodesUsedForLabels.add(node);
+        // populate node labels ArrayList.
+        for (Node n: nodesUsedForLabels) {
+            this.nodeLabels.add(n.getLabel());
+        }
+    }
+
+    public void addCPTvalues(double ... values) {
+        this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
+    public String toString() {
+        return "CPT{" +
+                "nodeLabels=" + nodeLabels +
+                '}';
+    }
 }

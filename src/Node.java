@@ -11,19 +11,12 @@ public class Node {
      * Create a new node.
      *
      * @param label the label of the node.
-     * @param vals  the values to put in the CPT.
      */
     public Node(String label) {
         parents = new ArrayList<>();
         children = new ArrayList<>();
         this.label = label;
-    }
-
-    public void addCPTvalues(double... vals) {
-        ArrayList<Node> nodesForLabels = (ArrayList<Node>) parents.clone();
-        nodesForLabels.add(this);
-        System.out.println("before"+nodesForLabels);
-        this.cpt = new CPT(nodesForLabels, vals); // create CPT given the values.
+        this.cpt = new CPT(this);
     }
 
     public String getLabel() {

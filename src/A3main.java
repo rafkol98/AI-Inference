@@ -150,12 +150,12 @@ public class A3main {
                 bn.addEdge(m, o);
 
                 // add cpt values.
-                j.addCPTvalues(0.05, 0.95);
-                k.addCPTvalues( 0.3, 0.7, 0.1, 0.9);
-                l.addCPTvalues(0.7, 0.3);
-                m.addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
-                n.addCPTvalues(0.8, 0.2, 0.4, 0.6);
-                o.addCPTvalues(0.2, 0.8, 0.95, 0.05);
+                j.getCpt().addCPTvalues(0.05, 0.95);
+                k.getCpt().addCPTvalues( 0.3, 0.7, 0.1, 0.9);
+                l.getCpt().addCPTvalues(0.7, 0.3);
+                m.getCpt().addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
+                n.getCpt().addCPTvalues(0.8, 0.2, 0.4, 0.6);
+                o.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
 
 
         }
