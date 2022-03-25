@@ -1,11 +1,16 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 public class CPT {
+int i = 0;
     private Node node;
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
+
+
 
     public CPT(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
@@ -40,7 +45,7 @@ public class CPT {
      */
     public void printCPT() {
         // Get the number of nodes in this CPT.
-        int numberNodes = node.getParents().size() > 0 ? node.getParents().size() + 1 : 1;
+        int numberNodes = nodeLabels.size();
 
         int size = (int) Math.pow(2, numberNodes);
 
@@ -59,7 +64,6 @@ public class CPT {
 
         }
     }
-
 
     private void printCPTHead() {
         String head = "";
@@ -87,6 +91,48 @@ public class CPT {
         }
 
     }
+//        for(
+
+    // value determine on where to start skipping.
+    public ArrayList<Double> get(String label, double value) {
+        // FIND INDEX OF LABEL IN THE NODELABELS ARRAYLIST.
+        int columnIndexForLabel = nodeLabels.indexOf(label) + 1;
+        if (columnIndexForLabel != -1) {
+            // find the number of zeros for the first column.
+            // To do that you get the number of all combinations divided by 2.
+            int zerosElement = (int) Math.pow(2, nodeLabels.size()) / 2;
+
+            for (int i = 1; i < columnIndexForLabel; i++) {
+                zerosElement /= 2;
+            }
+
+            int finalZerosElement = zerosElement;
+            return getEveryNthElement(finalZerosElement);
+
+        }
+
+
+        return null;
+    }
+
+//    i<cptValues.size();i++)
+
+    /**
+     * Get every nth element
+     * @param nthElement
+     * @return
+     */
+    public ArrayList<Double> getEveryNthElement(int nthElement) {
+        ArrayList<Double> elements = new ArrayList<>();
+
+        for (int i = 0; i < cptValues.size(); i += nthElement*2) {
+            for (int x = 0; x<nthElement; x++) {
+                elements.add(cptValues.get(i+x));
+            }
+        }
+
+        return elements;
+}
 
     @Override
     public String toString() {

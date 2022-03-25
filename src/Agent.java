@@ -23,6 +23,8 @@ public class Agent {
     public void variableElimination(BayesianNetwork bn, Node queried, ArrayList<String> order) {
         pruneIrrelevantVariables();
         ArrayList<CPT> factors = createSetFactors();
+        ArrayList<Double> t = factors.get(3).get("L",0);
+        System.out.println(t);
 
         for (String label : order) {
             ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
@@ -67,8 +69,7 @@ public class Agent {
         // iterate through the nodes of the BN.
         for (Node node : bn.getNodes()) {
             factors.add(node.getCpt());
-            node.getCpt().printCPT(); // print the CPT.
-            System.out.println("dame"+node.getCpt().getNodeLabels());
+            node.getCpt().printCPT();
         }
         return factors;
     }
@@ -92,6 +93,8 @@ public class Agent {
         return toSumOut;
     }
 
+
+
 //    public CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
 //
 //    }
@@ -108,6 +111,8 @@ public class Agent {
         combined.addAll(v3);
 
         CPT f3 = new CPT(combined);
+
+        System.out.println(combined);
 
         return f3;
     }
