@@ -22,7 +22,7 @@ public class Agent {
     public void variableElimination(BayesianNetwork bn, Node queried, ArrayList<String> order) {
         pruneIrrelevantVariables();
         ArrayList<CPT> factors = createSetFactors();
-        join(factors.get(0), factors.get(1));
+        join(factors.get(2), factors.get(3));
 
 
 //        ArrayList<Double> t = factors.get(3).get("L",0);
@@ -138,6 +138,7 @@ public class Agent {
         System.out.println("\n\n "+ combined);
         newFactor.constructAndPrintCPT(true);
 
+        ArrayList<Double> valuesJoined = new ArrayList<>();
         for (ArrayList<Integer> row : newFactor.getValuesMap().keySet()) {
             System.out.println("\n\nrow"+row);
             ArrayList<Double> valuesF1 = first.getValues(combined,row);
@@ -147,6 +148,9 @@ public class Agent {
             System.out.println(second.getNodeLabels());
             System.out.println("Second: "+valuesF2);
             System.out.println();
+
+//            double multiplied = valuesF1 * valuesF2;
+//            valuesJoined.add();
 
 
         }

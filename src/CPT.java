@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -10,16 +11,16 @@ public class CPT {
     private Node node;
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
-    private HashMap<ArrayList<Integer>, Double> valuesMap;
+    private LinkedHashMap<ArrayList<Integer>, Double> valuesMap;
 
     public CPT(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
-        this.valuesMap = new HashMap<>();
+        this.valuesMap = new LinkedHashMap<>();
     }
 
     public CPT(Node node) {
         this.nodeLabels = new ArrayList<>();
-        this.valuesMap = new HashMap<>();
+        this.valuesMap = new LinkedHashMap<>();
         this.node = node;
     }
 
