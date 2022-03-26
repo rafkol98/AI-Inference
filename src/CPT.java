@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -13,12 +14,17 @@ public class CPT {
 
     public CPT(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
+        this.valuesMap = new HashMap<>();
     }
 
     public CPT(Node node) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new HashMap<>();
         this.node = node;
+    }
+
+    public HashMap<ArrayList<Integer>, Double> getValuesMap() {
+        return valuesMap;
     }
 
     public ArrayList<String> getNodeLabels() {
@@ -41,7 +47,6 @@ public class CPT {
         constructAndPrintCPT(false);
     }
 
-
     /**
      * Print the CPT.
      */
@@ -52,7 +57,10 @@ public class CPT {
         int size = (int) Math.pow(2, numberNodes);
 
         if (print) {
-            printCPTHead();
+            if (cptValues!= null) {
+                printCPTHead();
+            }
+
         }
 
         // Create truth tables.
@@ -72,12 +80,21 @@ public class CPT {
                 valuesTableRow.add(Character.getNumericValue(c));
             }
 
-            double nodeValue = node.getCpt().getCptValues().get(i);
-            if (print) {
-                System.out.println("|" + nodeValue); // print node value.
+            //TODO: remove this - only useful for debug
+            if (cptValues != null) {
+                double nodeValue = node.getCpt().getCptValues().get(i);
+                if (print) {
+
+                    System.out.println("|" + nodeValue); // print node value.
+                }
+                valuesMap.put(valuesTableRow, nodeValue);
+            } else {
+                if (print) {
+                   System.out.println("|" + 0);
+                    valuesMap.put(valuesTableRow, 0.0);
+                }
             }
 
-            valuesMap.put(valuesTableRow, nodeValue);
 
         }
     }
@@ -112,6 +129,7 @@ public class CPT {
     /**
      * Get values in the truth table for the combination (or single) of labels and expected truth values
      * for each passed in.
+     *
      * @param labels
      * @param truthValues
      * @return
@@ -120,13 +138,13 @@ public class CPT {
         ArrayList<Double> values = new ArrayList<>();
         // populate a map with label (key) and corresponding required truth table value (value).
         HashMap<String, Integer> tempMap = populateMap(labels, truthValues);
+        truthValues = trimTruthValues(tempMap, labels, truthValues);
 
         // if the population of map was successful, find appropriate elements in the CPT table.
         if (tempMap.size() > 0) {
             // Iterate through all the valuesMap keys - ArrayList entries.
             // Each entry/key corresponds to a row in the table.
             for (ArrayList<Integer> key : valuesMap.keySet()) {
-
                 ArrayList<Integer> matching = new ArrayList<>(); // store matching values (in correct places).
                 // iterate through all values in the current key.
                 for (int i = 0; i < key.size(); i++) {
@@ -151,9 +169,31 @@ public class CPT {
         return values;
     }
 
+    /**
+     * Keep only the truth values relating to the CPT.
+     * @param tempMap
+     * @param labels
+     * @param truthValues
+     * @return
+     */
+    public ArrayList<Integer> trimTruthValues(HashMap<String, Integer> tempMap, ArrayList<String> labels, ArrayList<Integer> truthValues) {
+        ArrayList<Integer> newTruthValues = new ArrayList<>();
+        for (String key : tempMap.keySet()) {
+            for (String label : labels) {
+                if (key.equalsIgnoreCase(label)) {
+                    int index = labels.indexOf(label);
+                    newTruthValues.add(truthValues.get(index));
+                }
+            }
+        }
+
+        return newTruthValues;
+    }
+
 
     /**
      * Populate a map with the label and truth value required for each.
+     *
      * @param labels
      * @param truthValues
      * @return
@@ -161,54 +201,24 @@ public class CPT {
     public HashMap<String, Integer> populateMap(ArrayList<String> labels, ArrayList<Integer> truthValues) {
         HashMap<String, Integer> tempMap = new HashMap<>();
 
-        if (labels.size() == truthValues.size()) {
-            // they are the same size so assign each label a truth value.
-            // E.g. K : 0, L : 1.
-            for (int i = 0; i < labels.size(); i++) {
-                tempMap.put(labels.get(i), truthValues.get(i));
+        for (int i = 0; i < labels.size(); i++) {
+            int index = nodeLabels.indexOf(labels.get(i));
+            if (index != -1) {
+//                System.out.println("label "+labels.get(i) + "index: "+nodeLabels.indexOf(labels.get(i)));
+                tempMap.put(labels.get(i), truthValues.get(index));
             }
         }
+
+
+//        if (labels.size() == truthValues.size()) {
+//            // they are the same size so assign each label a truth value.
+//            // E.g. K : 0, L : 1.
+//            for (int i = 0; i < labels.size(); i++) {
+//                tempMap.put(labels.get(i), truthValues.get(i));
+//            }
+//        }
         return tempMap;
     }
-//
-//    //TODO: get specified value. THIS IS JUST SINGLE CASE.
-//    // value determine on where to start skipping.
-//    public ArrayList<Double> get(String label, double value) {
-//        // FIND INDEX OF LABEL IN THE NODELABELS ARRAYLIST.
-//        int columnIndexForLabel = nodeLabels.indexOf(label) + 1;
-//        if (columnIndexForLabel != -1) {
-//            // find the number of zeros for the first column.
-//            // To do that you get the number of all combinations divided by 2.
-//            int zerosElement = (int) Math.pow(2, nodeLabels.size()) / 2;
-//
-//            for (int i = 1; i < columnIndexForLabel; i++) {
-//                zerosElement /= 2;
-//            }
-//
-//            int finalZerosElement = zerosElement;
-//            return getEveryNthElement(finalZerosElement);
-//
-//        }
-//
-//        return null;
-//    }
-
-//    /**
-//     * Get every nth element
-//     * @param nthElement
-//     * @return
-//     */
-//    public ArrayList<Double> getEveryNthElement(int nthElement) {
-//        ArrayList<Double> elements = new ArrayList<>();
-//
-//        for (int i = 0; i < cptValues.size(); i += nthElement*2) {
-//            for (int x = 0; x<nthElement; x++) {
-//                elements.add(cptValues.get(i+x));
-//            }
-//        }
-//
-//        return elements;
-//    }
 
     @Override
     public String toString() {
