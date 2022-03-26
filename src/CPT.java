@@ -1,16 +1,15 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 public class CPT {
-int i = 0;
     private Node node;
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
-
-
+    private HashMap<ArrayList<Integer>, Double> valuesMap;
 
     public CPT(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
@@ -18,6 +17,7 @@ int i = 0;
 
     public CPT(Node node) {
         this.nodeLabels = new ArrayList<>();
+        this.valuesMap = new HashMap<>();
         this.node = node;
     }
 
@@ -38,29 +38,46 @@ int i = 0;
             this.nodeLabels.add(n.getLabel());
         }
         this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
+        constructAndPrintCPT(false);
     }
+
 
     /**
      * Print the CPT.
      */
-    public void printCPT() {
+    public void constructAndPrintCPT(boolean print) {
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
 
         int size = (int) Math.pow(2, numberNodes);
 
-        printCPTHead();
+        if (print) {
+            printCPTHead();
+        }
 
         // Create truth tables.
         for (int i = 0; i < size; i++) {
+            // ArrayList stores all the values for the current column. Used as key for the HashMap
+            ArrayList<Integer> valuesTableRow = new ArrayList<>();
+
             int repeat = numberNodes - Integer.toBinaryString(i).length();
 
             String truths = "0".repeat(repeat) + Integer.toBinaryString(i);
 
             for (char c : truths.toCharArray()) {
-                System.out.print(c + "\t");
+                if (print) {
+                    System.out.print(c + "\t");  // print the char value.
+                }
+                // add the character (0 or 1) for the specific element in the ArrayList.
+                valuesTableRow.add(Character.getNumericValue(c));
             }
-            System.out.println("|" + node.getCpt().getCptValues().get(i));
+
+            double nodeValue = node.getCpt().getCptValues().get(i);
+            if (print) {
+                System.out.println("|" + nodeValue); // print node value.
+            }
+
+            valuesMap.put(valuesTableRow, nodeValue);
 
         }
     }
@@ -91,8 +108,8 @@ int i = 0;
         }
 
     }
-//        for(
 
+    //TODO: get specified value. THIS IS JUST SINGLE CASE.
     // value determine on where to start skipping.
     public ArrayList<Double> get(String label, double value) {
         // FIND INDEX OF LABEL IN THE NODELABELS ARRAYLIST.
@@ -111,11 +128,8 @@ int i = 0;
 
         }
 
-
         return null;
     }
-
-//    i<cptValues.size();i++)
 
     /**
      * Get every nth element
@@ -139,5 +153,11 @@ int i = 0;
         return "CPT{" +
                 "nodeLabels=" + nodeLabels +
                 '}';
+    }
+
+    //TODO: remove - only used for debug.
+    public void printMap() {
+        System.out.println(nodeLabels);
+        System.out.println(valuesMap);
     }
 }

@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -24,6 +23,7 @@ public class Agent {
         pruneIrrelevantVariables();
         ArrayList<CPT> factors = createSetFactors();
         ArrayList<Double> t = factors.get(3).get("L",0);
+        factors.get(3).printMap();
         System.out.println(t);
 
         for (String label : order) {
@@ -69,7 +69,7 @@ public class Agent {
         // iterate through the nodes of the BN.
         for (Node node : bn.getNodes()) {
             factors.add(node.getCpt());
-            node.getCpt().printCPT();
+            node.getCpt().constructAndPrintCPT(true);
         }
         return factors;
     }

@@ -47,7 +47,7 @@ public class BayesianNetwork {
      */
     public void printNetwork() {
         for (Node node : nodes) {
-            node.getCpt().printCPT();
+            node.getCpt().constructAndPrintCPT(true);
             System.out.println("\n");
         }
     }
