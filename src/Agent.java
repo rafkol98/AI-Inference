@@ -26,9 +26,11 @@ public class Agent {
         factors.get(3).printMap();
 //        System.out.println(t);
         ArrayList<String> labels = new ArrayList<>();
-        labels.add("L");
+        labels.add("K");
         labels.add("M");
+        labels.add("L");
         ArrayList<Integer> truthValues = new ArrayList<>();
+        truthValues.add(1);
         truthValues.add(0);
         truthValues.add(0);
         ArrayList<Double> t = factors.get(3).getValues(labels, truthValues);

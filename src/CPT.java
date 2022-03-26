@@ -109,58 +109,66 @@ public class CPT {
 
     }
 
+    /**
+     * Get values in the truth table for the combination (or single) of labels and expected truth values
+     * for each passed in.
+     * @param labels
+     * @param truthValues
+     * @return
+     */
     public ArrayList<Double> getValues(ArrayList<String> labels, ArrayList<Integer> truthValues) {
         ArrayList<Double> values = new ArrayList<>();
+        // populate a map with label (key) and corresponding required truth table value (value).
+        HashMap<String, Integer> tempMap = populateMap(labels, truthValues);
 
-        // labels size must equal truh values size.
-        if (labels.size() == truthValues.size()) {
-            HashMap<String, Integer> tempMap = populateMap(labels, truthValues);
-            ArrayList<Integer> indexes = new ArrayList<>(); // store indexes in nodeLabels of the passed in labels.
-
-//            for (String label: labels) {
-//                indexes.add(nodeLabels.indexOf(label)); // add node labels
-//            }
-
-
+        // if the population of map was successful, find appropriate elements in the CPT table.
+        if (tempMap.size() > 0) {
+            // Iterate through all the valuesMap keys - ArrayList entries.
+            // Each entry/key corresponds to a row in the table.
             for (ArrayList<Integer> key : valuesMap.keySet()) {
-                System.out.println(key);
-                ArrayList<Integer> valuesX = new ArrayList<>();
-                for (int i=0; i<key.size(); i++) {
 
+                ArrayList<Integer> matching = new ArrayList<>(); // store matching values (in correct places).
+                // iterate through all values in the current key.
+                for (int i = 0; i < key.size(); i++) {
+                    // if the labels passed in has the value for the current column,
+                    // check if the value is the same.
                     if (labels.contains(nodeLabels.get(i))) {
-
-                        System.out.println("key i value"+key.get(i));
-                        System.out.println("node label value"+ tempMap.get(nodeLabels.get(i)));
                         if (key.get(i) == tempMap.get(nodeLabels.get(i))) {
-                            System.out.println("mesa");
-                            valuesX.add(key.get(i));
+                            matching.add(key.get(i)); // add matching value to the matching arraylist.
                         }
                     }
 
                 }
 
-                if (valuesX.equals(truthValues)) {
+                // if matching arraylist for this specific key equals the truth values expected,
+                // add the hashmap value to the values returned variable.
+                if (matching.equals(truthValues)) {
                     values.add(valuesMap.get(key));
                 }
-                System.out.println("NEW ONE");
             }
         }
 
-       return values;
+        return values;
     }
 
 
+    /**
+     * Populate a map with the label and truth value required for each.
+     * @param labels
+     * @param truthValues
+     * @return
+     */
     public HashMap<String, Integer> populateMap(ArrayList<String> labels, ArrayList<Integer> truthValues) {
         HashMap<String, Integer> tempMap = new HashMap<>();
 
         if (labels.size() == truthValues.size()) {
             // they are the same size so assign each label a truth value.
             // E.g. K : 0, L : 1.
-            for (int i=0; i<labels.size(); i++) {
+            for (int i = 0; i < labels.size(); i++) {
                 tempMap.put(labels.get(i), truthValues.get(i));
             }
         }
-       return tempMap;
+        return tempMap;
     }
 //
 //    //TODO: get specified value. THIS IS JUST SINGLE CASE.
