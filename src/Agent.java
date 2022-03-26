@@ -22,10 +22,17 @@ public class Agent {
     public void variableElimination(BayesianNetwork bn, Node queried, ArrayList<String> order) {
         pruneIrrelevantVariables();
         ArrayList<CPT> factors = createSetFactors();
-        ArrayList<Double> t = factors.get(3).get("L",0);
+//        ArrayList<Double> t = factors.get(3).get("L",0);
         factors.get(3).printMap();
+//        System.out.println(t);
+        ArrayList<String> labels = new ArrayList<>();
+        labels.add("L");
+        labels.add("M");
+        ArrayList<Integer> truthValues = new ArrayList<>();
+        truthValues.add(0);
+        truthValues.add(0);
+        ArrayList<Double> t = factors.get(3).getValues(labels, truthValues);
         System.out.println(t);
-
         for (String label : order) {
             ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
             factors.removeAll(toSumOut); // remove all factors containing label.

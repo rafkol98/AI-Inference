@@ -109,44 +109,98 @@ public class CPT {
 
     }
 
-    //TODO: get specified value. THIS IS JUST SINGLE CASE.
-    // value determine on where to start skipping.
-    public ArrayList<Double> get(String label, double value) {
-        // FIND INDEX OF LABEL IN THE NODELABELS ARRAYLIST.
-        int columnIndexForLabel = nodeLabels.indexOf(label) + 1;
-        if (columnIndexForLabel != -1) {
-            // find the number of zeros for the first column.
-            // To do that you get the number of all combinations divided by 2.
-            int zerosElement = (int) Math.pow(2, nodeLabels.size()) / 2;
+    public ArrayList<Double> getValues(ArrayList<String> labels, ArrayList<Integer> truthValues) {
+        ArrayList<Double> values = new ArrayList<>();
 
-            for (int i = 1; i < columnIndexForLabel; i++) {
-                zerosElement /= 2;
+        // labels size must equal truh values size.
+        if (labels.size() == truthValues.size()) {
+            HashMap<String, Integer> tempMap = populateMap(labels, truthValues);
+            ArrayList<Integer> indexes = new ArrayList<>(); // store indexes in nodeLabels of the passed in labels.
+
+//            for (String label: labels) {
+//                indexes.add(nodeLabels.indexOf(label)); // add node labels
+//            }
+
+
+            for (ArrayList<Integer> key : valuesMap.keySet()) {
+                System.out.println(key);
+                ArrayList<Integer> valuesX = new ArrayList<>();
+                for (int i=0; i<key.size(); i++) {
+
+                    if (labels.contains(nodeLabels.get(i))) {
+
+                        System.out.println("key i value"+key.get(i));
+                        System.out.println("node label value"+ tempMap.get(nodeLabels.get(i)));
+                        if (key.get(i) == tempMap.get(nodeLabels.get(i))) {
+                            System.out.println("mesa");
+                            valuesX.add(key.get(i));
+                        }
+                    }
+
+                }
+
+                if (valuesX.equals(truthValues)) {
+                    values.add(valuesMap.get(key));
+                }
+                System.out.println("NEW ONE");
             }
-
-            int finalZerosElement = zerosElement;
-            return getEveryNthElement(finalZerosElement);
-
         }
 
-        return null;
+       return values;
     }
 
-    /**
-     * Get every nth element
-     * @param nthElement
-     * @return
-     */
-    public ArrayList<Double> getEveryNthElement(int nthElement) {
-        ArrayList<Double> elements = new ArrayList<>();
 
-        for (int i = 0; i < cptValues.size(); i += nthElement*2) {
-            for (int x = 0; x<nthElement; x++) {
-                elements.add(cptValues.get(i+x));
+    public HashMap<String, Integer> populateMap(ArrayList<String> labels, ArrayList<Integer> truthValues) {
+        HashMap<String, Integer> tempMap = new HashMap<>();
+
+        if (labels.size() == truthValues.size()) {
+            // they are the same size so assign each label a truth value.
+            // E.g. K : 0, L : 1.
+            for (int i=0; i<labels.size(); i++) {
+                tempMap.put(labels.get(i), truthValues.get(i));
             }
         }
+       return tempMap;
+    }
+//
+//    //TODO: get specified value. THIS IS JUST SINGLE CASE.
+//    // value determine on where to start skipping.
+//    public ArrayList<Double> get(String label, double value) {
+//        // FIND INDEX OF LABEL IN THE NODELABELS ARRAYLIST.
+//        int columnIndexForLabel = nodeLabels.indexOf(label) + 1;
+//        if (columnIndexForLabel != -1) {
+//            // find the number of zeros for the first column.
+//            // To do that you get the number of all combinations divided by 2.
+//            int zerosElement = (int) Math.pow(2, nodeLabels.size()) / 2;
+//
+//            for (int i = 1; i < columnIndexForLabel; i++) {
+//                zerosElement /= 2;
+//            }
+//
+//            int finalZerosElement = zerosElement;
+//            return getEveryNthElement(finalZerosElement);
+//
+//        }
+//
+//        return null;
+//    }
 
-        return elements;
-}
+//    /**
+//     * Get every nth element
+//     * @param nthElement
+//     * @return
+//     */
+//    public ArrayList<Double> getEveryNthElement(int nthElement) {
+//        ArrayList<Double> elements = new ArrayList<>();
+//
+//        for (int i = 0; i < cptValues.size(); i += nthElement*2) {
+//            for (int x = 0; x<nthElement; x++) {
+//                elements.add(cptValues.get(i+x));
+//            }
+//        }
+//
+//        return elements;
+//    }
 
     @Override
     public String toString() {
