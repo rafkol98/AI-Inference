@@ -141,6 +141,7 @@ public class CPT {
         HashMap<String, Integer> tempMap = populateMap(labels, truthValues);
         truthValues = trimTruthValues(tempMap, labels, truthValues);
 
+
         // if the population of map was successful, find appropriate elements in the CPT table.
         if (tempMap.size() > 0) {
             // Iterate through all the valuesMap keys - ArrayList entries.
@@ -152,13 +153,16 @@ public class CPT {
                     // if the labels passed in has the value for the current column,
                     // check if the value is the same.
                     if (labels.contains(nodeLabels.get(i))) {
-                        if (key.get(i) == tempMap.get(nodeLabels.get(i))) {
-                            matching.add(key.get(i)); // add matching value to the matching arraylist.
-                        }
+//                        System.out.println("key.get(i)"+ key.get(i));
+//                        System.out.println("tempMap.get(nodeLabels.get(i))"+ tempMap.get(nodeLabels.get(i)));
+//                        if (key.get(i) == tempMap.get(nodeLabels.get(i))) {
+                        matching.add(key.get(i)); // add matching value to the matching arraylist.
+//                        }
                     }
 
                 }
 
+                matchingAll(labels, truthValues, matching);
                 // if matching arraylist for this specific key equals the truth values expected,
                 // add the hashmap value to the values returned variable.
                 if (matching.equals(truthValues)) {
@@ -179,6 +183,9 @@ public class CPT {
      */
     public ArrayList<Integer> trimTruthValues(HashMap<String, Integer> tempMap, ArrayList<String> labels, ArrayList<Integer> truthValues) {
         ArrayList<Integer> newTruthValues = new ArrayList<>();
+        System.out.println("\n\n");
+        System.out.println(tempMap.keySet());
+        System.out.println(labels);
         for (String key : tempMap.keySet()) {
             for (String label : labels) {
                 if (key.equalsIgnoreCase(label)) {
@@ -188,7 +195,35 @@ public class CPT {
             }
         }
 
+        System.out.println(newTruthValues);
+        System.out.println("\n\n");
         return newTruthValues;
+    }
+
+    public boolean matchingAll(ArrayList<String> labels, ArrayList<Integer> truthValues, ArrayList<Integer> matching) {
+//        System.out.println("\n\nCALLED ");
+//        ArrayList<Integer> one = new ArrayList<>();
+        int counter = 0;
+        for (String label: labels) {
+//            System.out.println("nodeLabels: "+nodeLabels);
+            int indexTruth = nodeLabels.indexOf(label);
+            int indexMatching = labels.indexOf(label);
+//            System.out.println("INDEX TRUTH: "+indexTruth+" INDEX MATCHING"+indexMatching);
+
+            if (indexTruth != -1) {
+//                System.out.println("MESA TRUTH: "+truthValues);
+//                System.out.println("MESA MATCHING: "+matching);
+                if (truthValues.get(indexTruth) == matching.get(indexMatching)) {
+                    counter++;
+                }
+            }
+
+
+        }
+
+//        if (counter)
+
+        return counter == truthValues.size();
     }
 
 
