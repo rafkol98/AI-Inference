@@ -26,17 +26,41 @@ public class Agent {
         this.evidences = evidences;
     }
 
-    public double variableElimination(String value) {
-        pruneIrrelevantVariables(false);
+    public double variableElimination(String value, boolean evidence) {
+        pruneIrrelevantVariables(evidence);
         ArrayList<CPT> factors = createSetFactors();
-        CPT newFactor = null;
 
-        for (String label : order) {
-            ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
-            factors.removeAll(toSumOut); // remove all factors containing label.
-            // create a new factor with all variables in factors of ToSumOut but without label.
-            newFactor = joinMarginalise(toSumOut, label);
-            factors.add(newFactor); // add new factor.
+        // if we are performing variable elimination with evidence, then project evidence for related factors.
+        if (evidence) {
+            projectEvidence(factors);
+        }
+        CPT newFactor = null;
+        System.out.println("DEBUG ORDER" +order);
+        // if order has at least one element, then perform variable elimination.
+        if (order.size() >= 1) {
+            System.out.println("DEBUG MESA");
+            for (String label : order) {
+
+                System.out.println("DEBUG LABEL"+label);
+                ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
+                factors.removeAll(toSumOut); // remove all factors containing label.
+                // create a new factor with all variables in factors of ToSumOut but without label.
+                System.out.println("TO SUM OUT: "+ toSumOut);
+                newFactor = joinMarginalise(toSumOut, label);
+                newFactor.constructAndPrintCPT(true);
+                factors.add(newFactor); // add new factor.
+            }
+
+            if (evidence && factors.size() > 1) {
+                // the node label should be the same for both - the queried node.
+                CPT joined = join(factors, queried.getLabel());
+                newFactor = normalize(joined);
+            }
+        }
+        // otherwise just assign the queried node's cpt to newFactor and read its value.
+        else {
+            System.out.println("DEBUG e3o wtf");
+            newFactor = queried.getCpt();
         }
 
         // Get the truth value that we are looking.
@@ -44,26 +68,18 @@ public class Agent {
         return newFactor.getCPTSingleProb(truthLooking);
     }
 
-    public double variableEliminationWithEvidence(String value) {
-        pruneIrrelevantVariables(true);
-        ArrayList<CPT> factors = createSetFactors();
-        projectEvidence(factors);
-
-        return -1;
-    }
-
     private void projectEvidence(ArrayList<CPT> factors) {
         for (String[] ev : evidences) {
             // find the correspondent factor for current evidence label.
             CPT evFactor = getCorrespondentFactorForLabel(ev[0], factors);
-            System.out.println("DEBUG evFactor: "+evFactor);
-            evFactor.constructAndPrintCPT(true);
             boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
             evFactor.setToZero(truthToChange);
-            System.out.println("UPDATED:");
-            evFactor.constructAndPrintCPT(true);
-
         }
+    }
+
+    public CPT normalize(CPT joined) {
+        System.out.println("NORMALIZE"+joined);
+        return null;
     }
 
     /**
@@ -225,6 +241,7 @@ public class Agent {
 
     private CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
         CPT newFactor = join(toSumOut, label);
+        newFactor.constructAndPrintCPT(true);
         CPT marginalisedNewFactor = marginalise(newFactor, label);
 
         return marginalisedNewFactor;

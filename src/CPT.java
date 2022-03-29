@@ -54,6 +54,10 @@ public class CPT {
         populateMap();
     }
 
+    /**
+     * Set CPT values to zeros accordingly to evidence.
+     * @param changeTrueVals
+     */
     public void setToZero(boolean changeTrueVals) {
         if (changeTrueVals) {
             // update to zero when Evidence is equal to true.
@@ -68,11 +72,8 @@ public class CPT {
                 cptValues.set(i, 0.0);
             }
         }
-        System.out.println(valuesMap);
-        //TODO CHECK THAT THIS WORKS.
+        // update map.
         populateMap();
-        System.out.println("AFTER UPDATE VALUES MAP");
-        System.out.println(valuesMap);
     }
 
     public void addCPTvalues(double... values) {

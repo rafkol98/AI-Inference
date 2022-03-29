@@ -41,7 +41,7 @@ public class A3main {
                 String[] order = getOrder(sc);
                 // execute query of p(variable=value) with given order of elimination
                 Agent ve = new Agent(bn, variable, order);
-                double result = ve.variableElimination(value);
+                double result = ve.variableElimination(value, false);
                 printResult(result);
             }
             break;
@@ -57,7 +57,7 @@ public class A3main {
                 Agent ve = new Agent(bn, variable, order, evidence);
 
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result =  ve.variableEliminationWithEvidence(value);
+                double result =  ve.variableElimination(value, true);
 
                 printResult(result);
             }
