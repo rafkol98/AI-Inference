@@ -10,72 +10,94 @@ public class Agent {
     BayesianNetwork bn;
     Node queried;
     ArrayList<String> order;
+    ArrayList<String[]> evidences;
 
 
-    public Agent(BayesianNetwork bn, Node queried, String[] order) {
+    public Agent(BayesianNetwork bn, String queried, String[] order) {
         this.bn = bn;
-        this.queried = queried;
+        this.queried = bn.getNode(queried);;
         this.order = new ArrayList<>(Arrays.asList(order));
     }
 
+    public Agent(BayesianNetwork bn, String queried, String[] order, ArrayList<String[]> evidences) {
+        this.bn = bn;
+        this.queried = bn.getNode(queried);;
+        this.order = new ArrayList<>(Arrays.asList(order));
+        this.evidences = evidences;
+    }
+
     public double variableElimination(String value) {
-        System.out.println("\n\n\n\n");
-        System.out.println(order);
-        pruneIrrelevantVariables();
-        System.out.println(order);
+        pruneIrrelevantVariables(false);
         ArrayList<CPT> factors = createSetFactors();
         CPT newFactor = null;
 
-        System.out.println("FACTORS CREATED \n\n\n\n");
         for (String label : order) {
-            System.out.println("\nDEBUG LABEL:" +label);
             ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
-            System.out.println("DEBUG SUMOUT: "+toSumOut);
-            System.out.println("DEBUG FACTORS"+factors);
             factors.removeAll(toSumOut); // remove all factors containing label.
-
             // create a new factor with all variables in factors of ToSumOut but without label.
             newFactor = joinMarginalise(toSumOut, label);
             factors.add(newFactor); // add new factor.
-
         }
 
-        System.out.println("factors:::: " + factors);
-        ArrayList<String> nodeLabelsForFinalCPT = new ArrayList<>(newFactor.getNodeLabels());
+        // Get the truth value that we are looking.
+        int truthLooking =  (value.equalsIgnoreCase("T")) ? 1 : 0;
+        return newFactor.getCPTSingleProb(truthLooking);
+    }
 
-        if (nodeLabelsForFinalCPT.size() > 1) {
-            nodeLabelsForFinalCPT.remove(queried.getLabel()); // remove the queried label from the labels to marginalise.
-//            CPT queriedCPT = factors.get(0);
-            while (nodeLabelsForFinalCPT.size() != 0) {
-                String currentLabel = nodeLabelsForFinalCPT.get(0); // get first label.
-                // Query the last element to only get the queried node.
-                newFactor = marginalise(factors.get(0), currentLabel);
-                nodeLabelsForFinalCPT.remove(currentLabel);
-            }
+    public double variableEliminationWithEvidence(String value) {
+        pruneIrrelevantVariables(true);
+        ArrayList<CPT> factors = createSetFactors();
+        projectEvidence(factors);
+
+        return -1;
+    }
+
+    private void projectEvidence(ArrayList<CPT> factors) {
+        for (String[] ev : evidences) {
+            // find the correspondent factor for current evidence label.
+            CPT evFactor = getCorrespondentFactorForLabel(ev[0], factors);
+            System.out.println("DEBUG evFactor: "+evFactor);
+            evFactor.constructAndPrintCPT(true);
+            boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
+            evFactor.setToZero(truthToChange);
+            System.out.println("UPDATED:");
+            evFactor.constructAndPrintCPT(true);
+
         }
-
-        newFactor.constructAndPrintCPT(true);
-
-        // improve code quality.
-        int looking;
-        if (value.equalsIgnoreCase("T")) {
-            looking = 1;
-        } else {
-            looking = 0;
-        }
-        return newFactor.getCPTSingleProb(looking);
     }
 
     /**
-     * Remove every variable that is not an ancestor of a queried variable.
+     * Prunes all the irrelevant variables according to our task. If the vidence flag is true, then it deletes
+     * ancestors of the evidences.
+     * @param evidence
      */
-    public void pruneIrrelevantVariables() {
+    private void pruneIrrelevantVariables(boolean evidence) {
         ArrayList<String> ancLabels = new ArrayList<>();
-        ancLabels.add(queried.getLabel());
+        // prune not ancestors of queried node.
+        prune(queried, ancLabels);
+
+        // prune not ancestors of evidence nodes.
+        if (evidence) {
+            for (String[] ev: evidences) {
+                Node evNode = bn.getNode(ev[0]); // get node of evidence.
+                prune(evNode, ancLabels); // prune order lists based on this evidence ancestors.
+            }
+        }
+
+        order.retainAll(ancLabels); // retain all elements identified as ancestors.
+    }
+
+    /**
+     * Performs the pruning by removing every variable that is not an ancestor of a given initial node.
+     * @param initialNode the initial node that we search for its ancestors.
+     */
+    private void prune(Node initialNode, ArrayList<String> ancLabels) {
+
+        ancLabels.add(initialNode.getLabel());
 
         Stack<Node> ancestors = new Stack<>();
-        ancestors.push(queried);
-        Node currentNode = queried;
+        ancestors.push(initialNode);
+        Node currentNode = initialNode;
 
         // iterate all the ancestors.
         while (!ancestors.isEmpty()) {
@@ -89,7 +111,6 @@ public class Agent {
 
             currentNode = ancestors.pop(); // take out the first element in the stack.
         }
-        order.retainAll(ancLabels); // retain all elements identified as ancestors.
     }
 
     /**
@@ -97,7 +118,7 @@ public class Agent {
      *
      * @return
      */
-    public ArrayList<CPT> createSetFactors() {
+    private ArrayList<CPT> createSetFactors() {
         ArrayList<CPT> factors = new ArrayList<>();
 
         // iterate through the nodes of the BN.
@@ -118,7 +139,7 @@ public class Agent {
      * @param factors
      * @return
      */
-    public ArrayList<CPT> getFactorsContainingLabel(String label, ArrayList<CPT> factors) {
+    private ArrayList<CPT> getFactorsContainingLabel(String label, ArrayList<CPT> factors) {
         ArrayList<CPT> toSumOut = new ArrayList<>();
 
         for (CPT factor : factors) {
@@ -129,8 +150,25 @@ public class Agent {
         return toSumOut;
     }
 
+    /**
+     * Find the correspondent CPT/factor from the factors for a passed in label.
+     * @param label
+     * @return
+     */
+    private CPT getCorrespondentFactorForLabel(String label, ArrayList<CPT> factors) {
+        // Iterate through the factors.
+        for (CPT factor : factors) {
+            Node node = bn.getNode(label);
+            // if the corresponding node for that
+            if (factor.getCorrespondentNode().equals(node)) {
+                return factor;
+            }
+        }
+        return null;
+    }
+
     // remove variable.
-    public CPT marginalise(CPT newFactor, String label) {
+    private CPT marginalise(CPT newFactor, String label) {
         CPT marginalised = new CPT();
         System.out.println("INSIDE MARGINALISE");
         newFactor.constructAndPrintCPT(true);
@@ -241,7 +279,7 @@ public class Agent {
      * @param second
      * @return
      */
-    public ArrayList<String> getCombined(CPT first, CPT second) {
+    private ArrayList<String> getCombined(CPT first, CPT second) {
         ArrayList<String> v1 = variablesBoth(first, second); // variables in both.
         ArrayList<String> v2 = variablesNotInSecond(first, second); // variables in the first but not second.
         ArrayList<String> v3 = variablesNotInSecond(second, first); // variables in the second but not first.

@@ -29,8 +29,6 @@ public class A3main {
                 BayesianNetwork bn = getNetwork(args[1]);
                 // Print the network.
                 bn.printNetwork();
-
-
             }
             break;
 
@@ -39,14 +37,10 @@ public class A3main {
                 BayesianNetwork bn = getNetwork(args[1]);
                 String[] query=getQueriedNode(sc);
                 String variable = query[0];
-                Node n = bn.getNode(variable);
-                System.out.println(n);
                 String value = query[1];
-                System.out.println(variable);
-                System.out.println(value);
                 String[] order = getOrder(sc);
                 // execute query of p(variable=value) with given order of elimination
-                Agent ve = new Agent(bn, n, order);
+                Agent ve = new Agent(bn, variable, order);
                 double result = ve.variableElimination(value);
                 printResult(result);
             }
@@ -54,13 +48,17 @@ public class A3main {
 
             case "P3": {
                 //construct the network in args[1]
+                BayesianNetwork bn = getNetwork(args[1]);
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
                 String value = query[1];
                 String[] order = getOrder(sc);
                 ArrayList<String[]> evidence = getEvidence(sc);
+                Agent ve = new Agent(bn, variable, order, evidence);
+
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result = 0.570501;
+                double result =  ve.variableEliminationWithEvidence(value);
+
                 printResult(result);
             }
             break;
@@ -147,7 +145,7 @@ public class A3main {
 
                 System.out.println("DEBUG PRINT NETWORK");
                 bn.printNetwork();
-
+                break;
             case "BNB":
                 // Add nodes.
                 Node j = bn.addNode("J");
@@ -170,6 +168,7 @@ public class A3main {
                 m.getCpt().addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
                 n.getCpt().addCPTvalues(0.8, 0.2, 0.4, 0.6);
                 o.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
+                break;
         }
 
         return bn;

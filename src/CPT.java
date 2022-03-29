@@ -1,14 +1,11 @@
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 public class CPT {
-    private Node node;
+    private Node correspondentNode;
     private String nodeGivenLabel; // label of the given node.
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
@@ -25,15 +22,19 @@ public class CPT {
         this.nodeGivenLabel = nodeGivenLabel;
     }
 
-    public CPT(Node node) {
+    public CPT(Node correspondentNode) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
-        this.node = node;
-        this.nodeGivenLabel = node.getLabel();
+        this.correspondentNode = correspondentNode;
+        this.nodeGivenLabel = correspondentNode.getLabel();
     }
 
     public void setNodeLabels(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
+    }
+
+    public Node getCorrespondentNode() {
+        return correspondentNode;
     }
 
     public HashMap<ArrayList<Integer>, Double> getValuesMap() {
@@ -53,10 +54,31 @@ public class CPT {
         populateMap();
     }
 
+    public void setToZero(boolean changeTrueVals) {
+        if (changeTrueVals) {
+            // update to zero when Evidence is equal to true.
+            for (int i = 0; i < cptValues.size() - 1; i += 2) {
+                // update the value to 0.
+                cptValues.set(i, 0.0);
+            }
+        } else {
+            // update to zero when Evidence is equal to false.
+            for (int i = 1; i < cptValues.size(); i += 2) {
+                // update the value to 0.
+                cptValues.set(i, 0.0);
+            }
+        }
+        System.out.println(valuesMap);
+        //TODO CHECK THAT THIS WORKS.
+        populateMap();
+        System.out.println("AFTER UPDATE VALUES MAP");
+        System.out.println(valuesMap);
+    }
+
     public void addCPTvalues(double... values) {
         ArrayList<Node> nodesUsedForLabels = new ArrayList<>();
-        nodesUsedForLabels.addAll(node.getParents());
-        nodesUsedForLabels.add(node);
+        nodesUsedForLabels.addAll(correspondentNode.getParents());
+        nodesUsedForLabels.add(correspondentNode);
         // populate node labels ArrayList.
         for (Node n : nodesUsedForLabels) {
             this.nodeLabels.add(n.getLabel());
@@ -85,8 +107,6 @@ public class CPT {
             valuesMap.put(valuesTableRow, nodeValue);
         }
     }
-
-
 
     /**
      * Print the CPT.
@@ -146,7 +166,7 @@ public class CPT {
         String parentsStr = "";
 
 
-        int toRemove = node == null ? 0 : 1;
+        int toRemove = correspondentNode == null ? 0 : 1;
         // iterate until the previous to the last (last is always the element of the CPT).
         for (int i = 0; i < nodeLabels.size() - toRemove; i++) {
             head += nodeLabels.get(i) + "\t";
@@ -173,12 +193,10 @@ public class CPT {
 
     }
 
+    //TODO: improve!
     public double getCPTSingleProb(int truth) {
-//        System.out.println(valuesMap);
-//        System.out.println(truth);
         ArrayList<Integer> temp = new ArrayList<>();
         temp.add(truth);
-
         return valuesMap.get(temp);
     }
     public double getCPTProbability(ArrayList<Integer> truthValues) {
@@ -193,14 +211,8 @@ public class CPT {
                 '}';
     }
 
-    //TODO: remove - only used for debug.
-    public void printMap() {
-        System.out.println(nodeLabels);
-        System.out.println(valuesMap);
-    }
 
-
-    //TODO: change!!!
+    //TODO: change/improve!!!
     public ArrayList<ArrayList<Integer>> getCombinations() {
         ArrayList<ArrayList<Integer>> trueValues = new ArrayList<>();
         //
