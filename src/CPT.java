@@ -89,12 +89,16 @@ public class CPT {
         }
     }
 
+
+
     /**
      * Print the CPT.
      */
+    //TODO: redo the whole CPT printing.
     public void constructAndPrintCPT(boolean print) {
         System.out.println("NL:: "+nodeLabels);
         System.out.println("Node of: "+node);
+
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
 
@@ -142,12 +146,15 @@ public class CPT {
         }
     }
 
+    //TODO: redo the whole CPT printing.
     private void printCPTHead() {
         String head = "";
         String parentsStr = "";
 
+
+        int toRemove = node == null ? 0 : 1;
         // iterate until the previous to the last (last is always the element of the CPT).
-        for (int i = 0; i < nodeLabels.size() - 1; i++) {
+        for (int i = 0; i < nodeLabels.size() - toRemove; i++) {
             head += nodeLabels.get(i) + "\t";
             parentsStr += nodeLabels.get(i);
             // add comma connector.
@@ -155,6 +162,8 @@ public class CPT {
                 parentsStr += ",";
             }
         }
+
+
         // handle the case when node has parents.
         if (nodeLabels.size() > 1) {
             head += nodeGivenLabel + "\t"; // add label in the head string.
@@ -170,6 +179,9 @@ public class CPT {
 
     }
 
+    public double getCPTSingleProb(int truth) {
+        return valuesMap.get(truth);
+    }
     public double getCPTProbability(ArrayList<Integer> truthValues) {
         return valuesMap.get(truthValues);
     }

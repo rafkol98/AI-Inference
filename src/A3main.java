@@ -36,24 +36,19 @@ public class A3main {
             case "P2": {
                 // Construct the network in args[1].
                 BayesianNetwork bn = getNetwork(args[1]);
-                Node n = bn.getNode("N");
-                ArrayList<String> order = new ArrayList<>();
-                order.add("J");
-                order.add("K");
-                order.add("L");
-                order.add("M");
-                order.add("N");
-                order.add("O");
-                Agent ve = new Agent(bn, n, order);
 
-//                //construct the network in args[1]
-//                String[] query=getQueriedNode(sc);
-//                String variable=query[0];
-//                String value=query[1];
-//                String[] order=getOrder(sc);
-//                // execute query of p(variable=value) with given order of elimination
-//                double result=0.570501;
-//                printResult(result);
+
+
+                String[] query=getQueriedNode(sc);
+                String variable=query[0];
+                Node n = bn.getNode(variable);
+                String value=query[1];
+                String[] order=getOrder(sc);
+                // execute query of p(variable=value) with given order of elimination
+                Agent ve = new Agent(bn, n, order);
+                ve.variableElimination(value);
+                double result=0.570501;
+                printResult(result);
             }
             break;
 
