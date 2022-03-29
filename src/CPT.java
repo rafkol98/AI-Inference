@@ -67,14 +67,11 @@ public class CPT {
     private void populateMap() {
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
-
         int size = (int) Math.pow(2, numberNodes);
-
         // Create truth tables.
         for (int i = 0; i < size; i++) {
             // ArrayList stores all the values for the current column. Used as key for the HashMap
             ArrayList<Integer> valuesTableRow = new ArrayList<>();
-
             int repeat = numberNodes - Integer.toBinaryString(i).length();
 
             String truths = "0".repeat(repeat) + Integer.toBinaryString(i);
@@ -96,9 +93,6 @@ public class CPT {
      */
     //TODO: redo the whole CPT printing.
     public void constructAndPrintCPT(boolean print) {
-        System.out.println("NL:: "+nodeLabels);
-        System.out.println("Node of: "+node);
-
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
 
@@ -180,7 +174,12 @@ public class CPT {
     }
 
     public double getCPTSingleProb(int truth) {
-        return valuesMap.get(truth);
+//        System.out.println(valuesMap);
+//        System.out.println(truth);
+        ArrayList<Integer> temp = new ArrayList<>();
+        temp.add(truth);
+
+        return valuesMap.get(temp);
     }
     public double getCPTProbability(ArrayList<Integer> truthValues) {
         return valuesMap.get(truthValues);

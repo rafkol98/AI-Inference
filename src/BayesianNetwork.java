@@ -15,7 +15,7 @@ public class BayesianNetwork {
 
     public Node getNode(String label) {
         for (Node node : nodes) {
-            if (node.getLabel() == label) {
+            if (node.getLabel().equalsIgnoreCase(label)) {
                 return node;
             }
         }

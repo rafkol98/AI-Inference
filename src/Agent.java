@@ -15,46 +15,55 @@ public class Agent {
     public Agent(BayesianNetwork bn, Node queried, String[] order) {
         this.bn = bn;
         this.queried = queried;
-        this.order = (ArrayList<String>) Arrays.asList(order);
+        this.order = new ArrayList<>(Arrays.asList(order));
     }
 
     public double variableElimination(String value) {
-        if (order.contains(queried.getLabel())) {
-            order.remove(queried.getLabel());
-        }
-
+        System.out.println("\n\n\n\n");
+        System.out.println(order);
         pruneIrrelevantVariables();
+        System.out.println(order);
         ArrayList<CPT> factors = createSetFactors();
+        CPT newFactor = null;
+
+        System.out.println("FACTORS CREATED \n\n\n\n");
         for (String label : order) {
+            System.out.println("\nDEBUG LABEL:" +label);
             ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
+            System.out.println("DEBUG SUMOUT: "+toSumOut);
+            System.out.println("DEBUG FACTORS"+factors);
             factors.removeAll(toSumOut); // remove all factors containing label.
 
             // create a new factor with all variables in factors of ToSumOut but without label.
-            CPT newFactor = joinMarginalise(toSumOut, label);
+            newFactor = joinMarginalise(toSumOut, label);
             factors.add(newFactor); // add new factor.
+
         }
 
-        ArrayList<String> nodeLabelsForFinalCPT = new ArrayList<>(factors.get(0).getNodeLabels());
-        nodeLabelsForFinalCPT.remove(queried.getLabel()); // remove the queried label from the labels to marginalise.
-        //todo: might cause problem if only one element
-        CPT queriedCPT = factors.get(0);
-        while (nodeLabelsForFinalCPT .size() != 0) {
-            String currentLabel = nodeLabelsForFinalCPT.get(0); // get first label.
-            // Query the last element to only get the queried node.
-            queriedCPT = marginalise(factors.get(0), currentLabel);
-            nodeLabelsForFinalCPT.remove(currentLabel);
+        System.out.println("factors:::: " + factors);
+        ArrayList<String> nodeLabelsForFinalCPT = new ArrayList<>(newFactor.getNodeLabels());
+
+        if (nodeLabelsForFinalCPT.size() > 1) {
+            nodeLabelsForFinalCPT.remove(queried.getLabel()); // remove the queried label from the labels to marginalise.
+//            CPT queriedCPT = factors.get(0);
+            while (nodeLabelsForFinalCPT.size() != 0) {
+                String currentLabel = nodeLabelsForFinalCPT.get(0); // get first label.
+                // Query the last element to only get the queried node.
+                newFactor = marginalise(factors.get(0), currentLabel);
+                nodeLabelsForFinalCPT.remove(currentLabel);
+            }
         }
 
-        queriedCPT.constructAndPrintCPT(true);
+        newFactor.constructAndPrintCPT(true);
 
         // improve code quality.
         int looking;
         if (value.equalsIgnoreCase("T")) {
             looking = 1;
-        } else  {
+        } else {
             looking = 0;
         }
-        return queriedCPT.getCPTSingleProb(looking);
+        return newFactor.getCPTSingleProb(looking);
     }
 
     /**
@@ -90,11 +99,15 @@ public class Agent {
      */
     public ArrayList<CPT> createSetFactors() {
         ArrayList<CPT> factors = new ArrayList<>();
+
         // iterate through the nodes of the BN.
         for (Node node : bn.getNodes()) {
-            factors.add(node.getCpt());
-            node.getCpt().constructAndPrintCPT(true);
+            if (order.contains(node.getLabel()) || node.getLabel().equalsIgnoreCase(queried.getLabel())) {
+                factors.add(node.getCpt());
+                node.getCpt().constructAndPrintCPT(true);
+            }
         }
+
         return factors;
     }
 
@@ -119,21 +132,29 @@ public class Agent {
     // remove variable.
     public CPT marginalise(CPT newFactor, String label) {
         CPT marginalised = new CPT();
+        System.out.println("INSIDE MARGINALISE");
         newFactor.constructAndPrintCPT(true);
         // set node labels everything except current label.
         ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());
 
-        nodeLabels.remove(label);
-        marginalised.setNodeLabels(nodeLabels);
+        if (nodeLabels.size() > 1) {
+            //TODO: maybe this is causing the problem.
+            nodeLabels.remove(label);
+            marginalised.setNodeLabels(nodeLabels);
 
-        // add the marginalised values.
-        ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
+            // add the marginalised values.
+            ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
 
-        for (int i = 0; i < newFactor.getCptValues().size() - 1; i += 2) {
-            double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + 1);
-            marginalisedFactorValues.add(value);
+            for (int i = 0; i < newFactor.getCptValues().size() - 1; i += 2) {
+                double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + 1);
+                marginalisedFactorValues.add(value);
+            }
+            marginalised.addCPTvalues(marginalisedFactorValues);
+        } else if (nodeLabels.size() == 1) {
+            marginalised.setNodeLabels(nodeLabels);
         }
-        marginalised.addCPTvalues(marginalisedFactorValues);
+
+        marginalised.constructAndPrintCPT(true);
         return marginalised;
     }
 
@@ -196,15 +217,17 @@ public class Agent {
 
                 ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor, first);
                 ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newFactor, second);
-
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
 
                 newFactorValues.add(value);
             }
+
             // reverse values orders.
             Collections.reverse(newFactorValues);
             newFactor.addCPTvalues(newFactorValues);
+
             newFactor.constructAndPrintCPT(true);
+
             first = newFactor;
         }
 
@@ -213,6 +236,7 @@ public class Agent {
 
     /**
      * // Collect all the variables without repetition from the two CPT/factors tables.
+     *
      * @param first
      * @param second
      * @return

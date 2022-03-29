@@ -22,6 +22,7 @@ public class A3main {
 
         Scanner sc = new Scanner(System.in);
 
+
         switch (args[0]) {
             case "P1": {
                 // Construct the network in args[1].
@@ -36,18 +37,17 @@ public class A3main {
             case "P2": {
                 // Construct the network in args[1].
                 BayesianNetwork bn = getNetwork(args[1]);
-
-
-
                 String[] query=getQueriedNode(sc);
-                String variable=query[0];
+                String variable = query[0];
                 Node n = bn.getNode(variable);
-                String value=query[1];
-                String[] order=getOrder(sc);
+                System.out.println(n);
+                String value = query[1];
+                System.out.println(variable);
+                System.out.println(value);
+                String[] order = getOrder(sc);
                 // execute query of p(variable=value) with given order of elimination
                 Agent ve = new Agent(bn, n, order);
-                ve.variableElimination(value);
-                double result=0.570501;
+                double result = ve.variableElimination(value);
                 printResult(result);
             }
             break;
@@ -145,13 +145,14 @@ public class A3main {
                 bn.addEdge(m, o);
 
                 // add cpt values.
-                j.getCpt().addCPTvalues(0.05, 0.95);
+                j.getCpt().addCPTvalues(0.95, 0.05);
                 k.getCpt().addCPTvalues( 0.3, 0.7, 0.1, 0.9);
-                l.getCpt().addCPTvalues(0.7, 0.3);
+                l.getCpt().addCPTvalues(0.3, 0.7);
                 m.getCpt().addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
                 n.getCpt().addCPTvalues(0.8, 0.2, 0.4, 0.6);
                 o.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
-
+                System.out.println("DEBUG PRINT NETWORK");
+                bn.printNetwork();
 
         }
 
