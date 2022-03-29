@@ -128,9 +128,28 @@ public class A3main {
         //construct the network in args[1]
         switch (argumentIn) {
             case "BNA":
+                // Add nodes.
+                Node a = bn.addNode("A");
+                Node b = bn.addNode("B");
+                Node c = bn.addNode("C");
+                Node d = bn.addNode("D");
+
+                // Add Edges
+                bn.addEdge(a, b);
+                bn.addEdge(b, c);
+                bn.addEdge(c, d);
+
+                // Add cpt values to nodes.
+                a.getCpt().addCPTvalues(0.95, 0.05);
+                b.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
+                c.getCpt().addCPTvalues(0.7, 0.3, 0.9, 0.1);
+                d.getCpt().addCPTvalues(0.4, 0.6, 0.6, 0.4);
+
+                System.out.println("DEBUG PRINT NETWORK");
+                bn.printNetwork();
 
             case "BNB":
-                // Add nodes with their cpt tables.
+                // Add nodes.
                 Node j = bn.addNode("J");
                 Node k = bn.addNode("K");
                 Node l = bn.addNode("L");
@@ -144,16 +163,13 @@ public class A3main {
                 bn.addEdge(m, n);
                 bn.addEdge(m, o);
 
-                // add cpt values.
+                // Add cpt values to nodes.
                 j.getCpt().addCPTvalues(0.95, 0.05);
-                k.getCpt().addCPTvalues( 0.3, 0.7, 0.1, 0.9);
+                k.getCpt().addCPTvalues(0.3, 0.7, 0.1, 0.9);
                 l.getCpt().addCPTvalues(0.3, 0.7);
                 m.getCpt().addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
                 n.getCpt().addCPTvalues(0.8, 0.2, 0.4, 0.6);
                 o.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
-                System.out.println("DEBUG PRINT NETWORK");
-                bn.printNetwork();
-
         }
 
         return bn;
