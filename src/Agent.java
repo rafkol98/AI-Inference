@@ -21,11 +21,18 @@ public class Agent {
     }
 
     public void variableElimination(ArrayList<String> order) {
+        if (order.contains(queried.getLabel())) {
+            order.remove(queried.getLabel());
+            System.out.println("rORDER REMOVED "+order);
+        }
+
         pruneIrrelevantVariables();
         ArrayList<CPT> factors = createSetFactors();
-        System.out.println("factors"+factors);
+//        System.out.println("factors"+factors);
+//        System.out.println("ORDER::::"+order);
 
         for (String label : order) {
+            System.out.println("LABEL "+label);
             System.out.println(factors);
             ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
             factors.removeAll(toSumOut); // remove all factors containing label.
@@ -35,7 +42,10 @@ public class Agent {
                 CPT newFactor = joinMarginalise(toSumOut, label);
                 factors.add(newFactor); // add new factor.
             }
+
         }
+        System.out.println("factor"+factors);
+
     }
 
     /**
