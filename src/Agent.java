@@ -99,24 +99,44 @@ public class Agent {
     }
 
     // remove variable.
-    public void marginalise() {
+    public CPT marginalise(CPT newFactor, String label) {
+        CPT marginalised = new CPT();
 
+        // set node labels everything except current label.
+        ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());
+        nodeLabels.remove(label);
+        marginalised.setNodeLabels(nodeLabels);
+
+        // add the marginalised values.
+        ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
+
+        for (int i=0; i<newFactor.getCptValues().size() - 1; i += 2) {
+            System.out.println("first "+ newFactor.getCptValues().get(i));
+            System.out.println("second "+ newFactor.getCptValues().get(i+1));
+            double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i+1);
+            marginalisedFactorValues.add(value);
+        }
+        marginalised.addCPTvalues(marginalisedFactorValues);
+        System.out.println("MARGINALISE");
+        marginalised.constructAndPrintCPT(true);
+        System.out.println("meta");
+        return marginalised;
     }
 
 
-    public ArrayList<String> variablesBoth(CPT first, CPT second) {
+    private ArrayList<String> variablesBoth(CPT first, CPT second) {
         // return common elements in first and second CPTs.
         return (ArrayList<String>) first.getNodeLabels().stream().filter(second.getNodeLabels()::contains).collect(Collectors.toList());
     }
 
-    public ArrayList<String> variablesNotInSecond(CPT first, CPT second) {
+    private ArrayList<String> variablesNotInSecond(CPT first, CPT second) {
         return (ArrayList<String>) first.getNodeLabels().stream()
                 .filter(element -> !second.getNodeLabels().contains(element))
                 .collect(Collectors.toList());
     }
 
 
-    //TODO: change
+    //TODO: improve
     private ArrayList<Integer> getFactorTruthCombination(ArrayList<Integer> truthCombination, CPT newFactor, CPT factor) {
         ArrayList<Integer> factorTruth = new ArrayList<>();
         for (int i = 0; i < factor.getNodeLabels().size(); i++) {
@@ -130,9 +150,16 @@ public class Agent {
         return factorTruth;
     }
 
-    //TODO: change!
     private CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
-        System.out.println("\n LABEL " + label);
+        CPT newFactor = join(toSumOut, label);
+        CPT marginalisedNewFactor = marginalise(newFactor, label);
+
+        return marginalisedNewFactor;
+    }
+
+    //TODO: improve!
+    private CPT join(ArrayList<CPT> toSumOut, String label) {
+        System.out.println("LABEL: "+label);
         CPT newFactor = new CPT(label);
         CPT first = toSumOut.get(0);
 
@@ -151,6 +178,7 @@ public class Agent {
             combined.addAll(v2);
             combined.addAll(v3);
 
+            Collections.reverse(combined);
             // Truth combinations to calculate.
             newFactor.setNodeLabels(combined);
             // Get all the truth values combinations.
@@ -161,26 +189,22 @@ public class Agent {
             for (int x = 0; x < newFactorTruths.size(); x++) {
                 ArrayList<Integer> truthCombination = newFactorTruths.get(x);
 
-                ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor,first);
+                ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor, first);
                 ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newFactor, second);
 
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
 
                 newFactorValues.add(value);
             }
-
+            // reverse values orders.
             Collections.reverse(newFactorValues);
             newFactor.addCPTvalues(newFactorValues);
-//            newFactor.constructAndPrintCPT(true);
             first = newFactor;
         }
 
         System.out.println("NEW FACTOR");
         newFactor.constructAndPrintCPT(true);
-        // Create a new vector with all variables in factors of toSumOut but Y.
-//        CPT joinResult = new CPT(newFactor);
 
-//        return joinResult;
         return newFactor;
     }
 

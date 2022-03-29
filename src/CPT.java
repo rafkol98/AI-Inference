@@ -14,17 +14,16 @@ public class CPT {
     private ArrayList<Double> cptValues; // contains a value for each combination.
     private LinkedHashMap<ArrayList<Integer>, Double> valuesMap;
 
+    public CPT() {
+        this.nodeLabels = new ArrayList<>();
+        this.valuesMap = new LinkedHashMap<>();
+    }
 
     public CPT(String nodeGivenLabel) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
         this.nodeGivenLabel = nodeGivenLabel;
     }
-
-//    public CPT(ArrayList<String> nodeLabels) {
-//        this.nodeLabels = nodeLabels;
-//        this.valuesMap = new LinkedHashMap<>();
-//    }
 
     public CPT(Node node) {
         this.nodeLabels = new ArrayList<>();
