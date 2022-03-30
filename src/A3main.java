@@ -154,6 +154,7 @@ public class A3main {
                 Node m = bn.addNode("M");
                 Node n = bn.addNode("N");
                 Node o = bn.addNode("O");
+
                 // Add Edges
                 bn.addEdge(j, k);
                 bn.addEdge(k, m);
@@ -168,6 +169,35 @@ public class A3main {
                 m.getCpt().addCPTvalues( 0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
                 n.getCpt().addCPTvalues(0.8, 0.2, 0.4, 0.6);
                 o.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
+                break;
+            case "BNC":
+                // Add nodes.
+                Node p = bn.addNode("P");
+                Node q = bn.addNode("Q");
+                Node r = bn.addNode("R");
+                Node v = bn.addNode("V");
+                Node s = bn.addNode("S");
+                Node z = bn.addNode("Z");
+                Node u = bn.addNode("U");
+
+                // Add Edges
+                bn.addEdge(p, q);
+                bn.addEdge(q, v);
+                bn.addEdge(q, s);
+                bn.addEdge(r, v);
+                bn.addEdge(r, s);
+                bn.addEdge(v, z);
+                bn.addEdge(s, z);
+                bn.addEdge(s, u);
+
+                // Add cpt values to nodes.
+                p.getCpt().addCPTvalues(0.95, 0.05);
+                q.getCpt().addCPTvalues(0.3, 0.7, 0.1, 0.9);
+                r.getCpt().addCPTvalues(0.3, 0.7);
+                v.getCpt().addCPTvalues(0.9, 0.1, 0.85, 0.15, 0.45, 0.55, 0.3, 0.7);
+                s.getCpt().addCPTvalues(0.9, 0.1, 0.8, 0.2, 0.3, 0.7, 0.4, 0.6);
+                z.getCpt().addCPTvalues(0.8, 0.2, 0.6, 0.4, 0.3, 0.7, 0.35, 0.65);
+                u.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
                 break;
         }
 

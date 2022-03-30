@@ -208,6 +208,7 @@ public class CPT {
     }
 
     public double getCPTProbability(ArrayList<Integer> truthValues) {
+        populateMap();
         return valuesMap.get(truthValues);
     }
 
