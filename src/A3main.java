@@ -1,5 +1,6 @@
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 /********************Starter Code
@@ -65,15 +66,18 @@ public class A3main {
 
             case "P4": {
                 //construct the network in args[1]
+                BayesianNetwork bn = getNetwork(args[1]);
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
                 String value = query[1];
-                String order = "A,B";
+                String[] order = bn.maximumCardinalitySearch(variable);
                 ArrayList<String[]> evidence = getEvidence(sc);
+                Agent ve = new Agent(bn, variable, order, evidence);
+
                 // execute query of p(variable=value|evidence) with given order of elimination
                 //print the order
-                System.out.println(order);
-                double result = 0.570501;
+                System.out.println(Arrays.toString(order));
+                double result =  ve.variableElimination(value, true);
                 printResult(result);
             }
             break;

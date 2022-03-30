@@ -23,12 +23,7 @@ public class Agent {
         this.evidences = evidences;
     }
 
-    public double variableElimination(String value, boolean evidence, boolean orderStrategy) {
-        // if the user is running the algorithm with an automatic approach to determine the order
-        // for elimination, then use the maximumCardinalitySearch algorithm.
-        if (orderStrategy) {
-            order = maximumCardinalitySearch();
-        }
+    public double variableElimination(String value, boolean evidence) {
         pruneIrrelevantVariables(evidence);
         ArrayList<CPT> factors = createSetFactors();
 
@@ -66,7 +61,7 @@ public class Agent {
             newFactor = queried.getCpt();
         }
 
-
+        System.out.println("Order of elimination: "+order);
         newFactor.constructAndPrintCPT(true);
         // Get the truth value that we are looking.
         int truthLooking = (value.equalsIgnoreCase("T")) ? 1 : 0;
@@ -355,45 +350,4 @@ public class Agent {
         return combined;
     }
 
-    /**
-     * The maximum cardinality search algorithm for deciding order.
-     * @return
-     */
-    public ArrayList<String> maximumCardinalitySearch() {
-        ArrayList<Node> unmarked = bn.getNodes();
-        ArrayList<Node> marked = new ArrayList<>();
-        ArrayList<String> order = new ArrayList<>(); // store the order.
-
-        // the queried node is the starting node.
-        marked.add(queried);
-
-        for (int i = 0; i < bn.getNodes().size(); i++) {
-            Node labelWithMaxMarkedNeighbours = findMaximumNumberOfMarkedNeighbours(unmarked, marked);
-            order.add(labelWithMaxMarkedNeighbours.getLabel());
-            unmarked.remove(labelWithMaxMarkedNeighbours); // remove label with maximum number of marked neighbours from unmarked.
-            marked.add(labelWithMaxMarkedNeighbours); // add label to the marked list.
-        }
-        Collections.reverse(order); // reverse order
-        order.remove(queried.getLabel()); // remove queried label from the order list.
-
-        return order;
-    }
-
-    /**
-     * Find the node with the maximum number of marked neighbours.
-     * @param unmarked
-     * @param marked
-     * @return
-     */
-    public Node findMaximumNumberOfMarkedNeighbours(ArrayList<Node> unmarked, ArrayList<Node> marked) {
-        HashMap<Node, Integer> map = new HashMap<>(); // create a new map to store the results.
-
-        for (Node node : unmarked) {
-            ArrayList<Node> allNeighbours = node.getAllNeighbours(); // Get all the neighbours of the node.
-            allNeighbours.retainAll(marked); // Retain all the neighbours that are marked.
-            map.put(node, allNeighbours.size());  // Store the number of marked neighbours as the map entry value.
-        }
-        // return the string (label) in the hashmap with the maximum key value (marked neighbours)
-        return Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey();
-    }
 }
