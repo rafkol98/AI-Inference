@@ -29,6 +29,13 @@ public class CPT {
         this.nodeGivenLabel = correspondentNode.getLabel();
     }
 
+    public void updateCPTvalues(ArrayList<Double> newValues) {
+        for (int i=0; i<newValues.size(); i++) {
+            cptValues.set(i,newValues.get(i));
+        }
+        populateMap();
+    }
+
     public void setNodeLabels(ArrayList<String> nodeLabels) {
         this.nodeLabels = nodeLabels;
     }
@@ -112,7 +119,7 @@ public class CPT {
     /**
      * Print the CPT.
      */
-    //TODO: redo the whole CPT printing.
+    //TODO: redo the whole CPT printing. MAKE IT ONLY PRINTING
     public void constructAndPrintCPT(boolean print) {
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
@@ -191,7 +198,6 @@ public class CPT {
             head += ("| P(" + nodeGivenLabel + ")");
             System.out.println(head);
         }
-
     }
 
     //TODO: improve!
@@ -200,10 +206,10 @@ public class CPT {
         temp.add(truth);
         return valuesMap.get(temp);
     }
+
     public double getCPTProbability(ArrayList<Integer> truthValues) {
         return valuesMap.get(truthValues);
     }
-
 
     @Override
     public String toString() {

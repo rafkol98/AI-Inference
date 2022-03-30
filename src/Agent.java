@@ -39,47 +39,63 @@ public class Agent {
         // if order has at least one element, then perform variable elimination.
         if (order.size() >= 1) {
             System.out.println("DEBUG MESA");
-            for (String label : order) {
 
+            for (String label : order) {
                 System.out.println("DEBUG LABEL"+label);
+                System.out.println("FACTORS BEFORE: "+ factors);
                 ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
                 factors.removeAll(toSumOut); // remove all factors containing label.
+
                 // create a new factor with all variables in factors of ToSumOut but without label.
-                System.out.println("TO SUM OUT: "+ toSumOut);
                 newFactor = joinMarginalise(toSumOut, label);
                 newFactor.constructAndPrintCPT(true);
                 factors.add(newFactor); // add new factor.
+                System.out.println("FACTORS AFTER: "+ factors);
             }
 
-            if (evidence && factors.size() > 1) {
-                // the node label should be the same for both - the queried node.
-                CPT joined = join(factors, queried.getLabel());
-                newFactor = normalize(joined);
+            newFactor.constructAndPrintCPT(true);
+            if (evidence) {
+                if (factors.size() > 1) {
+                    // the node label should be the same for both - the queried node.
+                    newFactor = join(factors, queried.getLabel());
+                }
+                newFactor = normalize(newFactor);
             }
         }
         // otherwise just assign the queried node's cpt to newFactor and read its value.
-        else {
+        else if (order.size() == 0 || newFactor == null){
             System.out.println("DEBUG e3o wtf");
             newFactor = queried.getCpt();
         }
 
         // Get the truth value that we are looking.
         int truthLooking =  (value.equalsIgnoreCase("T")) ? 1 : 0;
+        newFactor.constructAndPrintCPT(true);
         return newFactor.getCPTSingleProb(truthLooking);
     }
 
     private void projectEvidence(ArrayList<CPT> factors) {
         for (String[] ev : evidences) {
             // find the correspondent factor for current evidence label.
-            CPT evFactor = getCorrespondentFactorForLabel(ev[0], factors);
+            CPT evFactor = getCorrespondentFactorForLabel(factors, ev[0]);
             boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
             evFactor.setToZero(truthToChange);
         }
     }
 
     public CPT normalize(CPT joined) {
-        System.out.println("NORMALIZE"+joined);
-        return null;
+        ArrayList<Double> normalizedValues = new ArrayList<>();
+        double trueValue = joined.getCPTSingleProb(1);
+        double falseValue = joined.getCPTSingleProb(0);
+        double sumValue = trueValue + falseValue;
+
+        normalizedValues.add(falseValue / sumValue); // add normalised false value.
+        normalizedValues.add(trueValue / sumValue); // add normalized true value.
+
+        // update joined CPT values.
+        joined.updateCPTvalues(normalizedValues);
+
+        return joined;
     }
 
     /**
@@ -171,7 +187,7 @@ public class Agent {
      * @param label
      * @return
      */
-    private CPT getCorrespondentFactorForLabel(String label, ArrayList<CPT> factors) {
+    private CPT getCorrespondentFactorForLabel(ArrayList<CPT> factors, String label) {
         // Iterate through the factors.
         for (CPT factor : factors) {
             Node node = bn.getNode(label);
@@ -240,7 +256,13 @@ public class Agent {
     }
 
     private CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
-        CPT newFactor = join(toSumOut, label);
+        CPT newFactor;
+        if (toSumOut.size() > 1) {
+            newFactor = join(toSumOut, label);
+        } else {
+            newFactor = toSumOut.get(0);
+        }
+
         newFactor.constructAndPrintCPT(true);
         CPT marginalisedNewFactor = marginalise(newFactor, label);
 
@@ -251,10 +273,11 @@ public class Agent {
     private CPT join(ArrayList<CPT> toSumOut, String label) {
         CPT newFactor = new CPT(label);
         CPT first = toSumOut.get(0);
-
+        System.out.println("DEBUG FIRST:"+first);
         // Join iteratively (two factors at a time).
         for (int i = 1; i < toSumOut.size(); i++) {
             CPT second = toSumOut.get(i);
+            System.out.println("DEBUG SECOND:"+second);
             ArrayList<String> combined = getCombined(first, second);
 
             first.constructAndPrintCPT(true);
@@ -285,7 +308,7 @@ public class Agent {
 
             first = newFactor;
         }
-
+        System.out.println("MEsa sto join: "+newFactor);
         return newFactor;
     }
 
