@@ -19,8 +19,6 @@ public class Node {
         this.cpt = new CPT(this);
     }
 
-
-
     public String getLabel() {
         return label;
     }
@@ -45,6 +43,17 @@ public class Node {
         children.add(child);
     }
 
+    /**
+     * Get all the neighbours (parents and childrens) of the node.
+     * @return
+     */
+    public ArrayList<Node> getAllNeighbours() {
+        ArrayList<Node> allNeighbours = new ArrayList<>();
+        // add both children and parents as all neighbours of the node.
+        allNeighbours.addAll(children);
+        allNeighbours.addAll(parents);
+        return allNeighbours;
+    }
 
     @Override
     public String toString() {

@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Agent {
@@ -16,22 +13,23 @@ public class Agent {
     public Agent(BayesianNetwork bn, String queried, String[] order) {
         this.bn = bn;
         this.queried = bn.getNode(queried);
-        ;
         this.order = new ArrayList<>(Arrays.asList(order));
     }
 
     public Agent(BayesianNetwork bn, String queried, String[] order, ArrayList<String[]> evidences) {
         this.bn = bn;
         this.queried = bn.getNode(queried);
-        ;
         this.order = new ArrayList<>(Arrays.asList(order));
         this.evidences = evidences;
     }
 
-    public double variableElimination(String value, boolean evidence) {
-        System.out.println("Order before: " + order);
+    public double variableElimination(String value, boolean evidence, boolean orderStrategy) {
+        // if the user is running the algorithm with an automatic approach to determine the order
+        // for elimination, then use the maximumCardinalitySearch algorithm.
+        if (orderStrategy) {
+            order = maximumCardinalitySearch();
+        }
         pruneIrrelevantVariables(evidence);
-        System.out.println("Order after: " + order);
         ArrayList<CPT> factors = createSetFactors();
 
         // if we are performing variable elimination with evidence, then project evidence for related factors.
@@ -51,19 +49,12 @@ public class Agent {
                 // create a new factor with all variables in factors of ToSumOut but without label.
                 newFactor = joinMarginalise(toSumOut, label);
                 factors.add(newFactor); // add new factor.
-//                System.out.println("CPT new factor");
-//                newFactor.constructAndPrintCPT(true);
 
                 System.out.println(factors);
             }
 
-            newFactor.constructAndPrintCPT(true);
-
             if (evidence) {
                 if (factors.size() > 1) {
-                    System.out.println("\n\nMESAAAAA");
-                    factors.get(0).constructAndPrintCPT(true);
-                    factors.get(1).constructAndPrintCPT(true);
                     // the node label should be the same for both - the queried node.
                     newFactor = join(factors, queried.getLabel());
                 }
@@ -89,7 +80,6 @@ public class Agent {
             CPT evFactor = getCorrespondentFactorForLabel(factors, ev[0]);
             boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
             evFactor.setToZero(truthToChange);
-            System.out.println("EV FACTOR PROJECT EV");
             evFactor.constructAndPrintCPT(true);
         }
     }
@@ -119,7 +109,6 @@ public class Agent {
         ArrayList<String> ancLabels = new ArrayList<>();
         // prune not ancestors of queried node.
         prune(queried, ancLabels);
-        System.out.println("queried: " + ancLabels);
         // prune not ancestors of evidence nodes.
         if (evidence) {
             for (String[] ev : evidences) {
@@ -127,7 +116,6 @@ public class Agent {
                 prune(evNode, ancLabels); // prune order lists based on this evidence ancestors.
             }
         }
-        System.out.println("after evidence:" + ancLabels);
 
         order.retainAll(ancLabels); // retain all elements identified as ancestors.
     }
@@ -216,7 +204,6 @@ public class Agent {
     // remove variable.
     private CPT marginalise(CPT newFactor, String label) {
         CPT marginalised = new CPT();
-        System.out.println("JOINED BEFORE MARGINALISE");
         newFactor.constructAndPrintCPT(true);
 
         // set node labels everything except current label.
@@ -224,7 +211,7 @@ public class Agent {
         ArrayList<String> nodeLabelsForIndexes = new ArrayList<>(newFactor.getNodeLabels());
         Collections.reverse(nodeLabelsForIndexes);
         int index = nodeLabelsForIndexes.indexOf(label);
-        System.out.println("DEBUG INDEX: "+index);
+        System.out.println("DEBUG INDEX: " + index);
 
         if (nodeLabels.size() > 1) {
             //TODO: maybe this is causing the problem.
@@ -232,7 +219,6 @@ public class Agent {
             marginalised.setNodeLabels(nodeLabels);
 
             int z = (int) Math.pow(2, index);
-            System.out.println("DEBUG z: "+z);
             int iterationSize = newFactor.getCptValues().size() / 2;
 
             // add the marginalised values.
@@ -244,8 +230,7 @@ public class Agent {
                     marginalisedFactorValues.add(value);
                 }
             } else {
-                for (int i = 0; i < iterationSize; i ++) {
-                    System.out.println("first: "+newFactor.getCptValues().get(i) + ", second: "+ newFactor.getCptValues().get(i + z));
+                for (int i = 0; i < iterationSize; i++) {
                     double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + z);
                     marginalisedFactorValues.add(value);
                 }
@@ -256,6 +241,7 @@ public class Agent {
             marginalised.setNodeLabels(nodeLabels);
         }
 
+        System.out.println("MARGINALISED TABLE");
         marginalised.constructAndPrintCPT(true);
         return marginalised;
     }
@@ -292,10 +278,8 @@ public class Agent {
         if (toSumOut.size() > 1) {
             newFactor = join(toSumOut, label);
         } else {
-            System.out.println("DEBUG: ELSE JOIN MARG");
             newFactor = toSumOut.get(0);
         }
-        System.out.println("LABEL TO MARGINALISE: " + label);
         CPT marginalisedNewFactor = marginalise(newFactor, label);
 
         return marginalisedNewFactor;
@@ -308,37 +292,25 @@ public class Agent {
         CPT first = toSumOut.get(0);
         // Join iteratively (two factors at a time).
         for (int i = 1; i < toSumOut.size(); i++) {
-            System.out.println("SOSSS MESA");
             first.constructAndPrintCPT(true);
             CPT second = toSumOut.get(i);
 
-            System.out.println("FIRST AND SECOND INSIDE JOIN");
             first.constructAndPrintCPT(true);
             second.constructAndPrintCPT(true);
-            System.out.println("END \n\n");
 
             ArrayList<String> combined = getCombined(first, second);
-            System.out.println("COMBINED "+ combined);
-            System.out.println("BEFORE LABELS: "+  newFactor.getNodeLabels());
-            System.out.println("DEBUG UNO"+first.getNodeLabels());
             // Truth combinations to calculate.
             newFactor.setNodeLabels(combined);
-            System.out.println("DEBUG UNO"+first.getNodeLabels());
 
             // Get all the truth values combinations.
             ArrayList<ArrayList<Integer>> newFactorTruths = newFactor.getCombinations();
             ArrayList<Double> newFactorValues = new ArrayList<>();
 
-            System.out.println("new factor truths: "+newFactorTruths.size());
-
             // Iterate through the new factors' truth combinations and calculate their values.
             for (int x = 0; x < newFactorTruths.size(); x++) {
                 ArrayList<Integer> truthCombination = newFactorTruths.get(x);
-                first.constructAndPrintCPT(true);
                 ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor, first);
-                System.out.println("F1 truth: " + f1Truth + " prob: " + first.getCPTProbability(f1Truth));
                 ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newFactor, second);
-                System.out.println("F2 truth: " + f2Truth + " prob: "+ second.getCPTProbability(f2Truth));
 
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
                 newFactorValues.add(value);
@@ -350,17 +322,12 @@ public class Agent {
             newFactor.addCPTvalues(newFactorValues);
 
             System.out.println("NEW FACTOR");
-            System.out.println("LABELS AFTER: "+newFactor.getNodeLabels());
+            System.out.println("LABELS AFTER: " + newFactor.getNodeLabels());
             newFactor.constructAndPrintCPT(true);
             System.out.println("END");
 
             //TODO: THiS IS THE PROBLEM
             first = new CPT(newFactor);
-//            try {
-//                first = newFactor.clone();
-//            } catch (CloneNotSupportedException e) {
-//                e.printStackTrace();
-//            }
         }
 
         System.out.println("OUT OF JOIN SOON...");
@@ -386,5 +353,47 @@ public class Agent {
 
         Collections.reverse(combined);
         return combined;
+    }
+
+    /**
+     * The maximum cardinality search algorithm for deciding order.
+     * @return
+     */
+    public ArrayList<String> maximumCardinalitySearch() {
+        ArrayList<Node> unmarked = bn.getNodes();
+        ArrayList<Node> marked = new ArrayList<>();
+        ArrayList<String> order = new ArrayList<>(); // store the order.
+
+        // the queried node is the starting node.
+        marked.add(queried);
+
+        for (int i = 0; i < bn.getNodes().size(); i++) {
+            Node labelWithMaxMarkedNeighbours = findMaximumNumberOfMarkedNeighbours(unmarked, marked);
+            order.add(labelWithMaxMarkedNeighbours.getLabel());
+            unmarked.remove(labelWithMaxMarkedNeighbours); // remove label with maximum number of marked neighbours from unmarked.
+            marked.add(labelWithMaxMarkedNeighbours); // add label to the marked list.
+        }
+        Collections.reverse(order); // reverse order
+        order.remove(queried.getLabel()); // remove queried label from the order list.
+
+        return order;
+    }
+
+    /**
+     * Find the node with the maximum number of marked neighbours.
+     * @param unmarked
+     * @param marked
+     * @return
+     */
+    public Node findMaximumNumberOfMarkedNeighbours(ArrayList<Node> unmarked, ArrayList<Node> marked) {
+        HashMap<Node, Integer> map = new HashMap<>(); // create a new map to store the results.
+
+        for (Node node : unmarked) {
+            ArrayList<Node> allNeighbours = node.getAllNeighbours(); // Get all the neighbours of the node.
+            allNeighbours.retainAll(marked); // Retain all the neighbours that are marked.
+            map.put(node, allNeighbours.size());  // Store the number of marked neighbours as the map entry value.
+        }
+        // return the string (label) in the hashmap with the maximum key value (marked neighbours)
+        return Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 }
