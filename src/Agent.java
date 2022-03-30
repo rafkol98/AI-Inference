@@ -278,7 +278,7 @@ public class Agent {
         ArrayList<Integer> factorTruth = new ArrayList<>();
         for (int i = 0; i < factor.getNodeLabels().size(); i++) {
             for (int j = 0; j < newFactor.getNodeLabels().size(); j++) {
-                if (newFactor.getNodeLabels().get(j).equals(factor.getNodeLabels().get(i))) {
+                if (newFactor.getNodeLabels().get(j).equalsIgnoreCase(factor.getNodeLabels().get(i))) {
                     factorTruth.add(truthCombination.get(j));
                 }
 
@@ -310,30 +310,53 @@ public class Agent {
         for (int i = 1; i < toSumOut.size(); i++) {
             System.out.println("SOSSS MESA");
             CPT second = toSumOut.get(i);
+
+            System.out.println("FIRST AND SECOND INSIDE JOIN");
+            first.constructAndPrintCPT(true);
+            second.constructAndPrintCPT(true);
+            System.out.println("END \n\n");
+
             ArrayList<String> combined = getCombined(first, second);
+            System.out.println("COMBINED "+ combined);
+            System.out.println("BEFORE LABELS: "+  newFactor.getNodeLabels());
+
             // Truth combinations to calculate.
             newFactor.setNodeLabels(combined);
             // Get all the truth values combinations.
             ArrayList<ArrayList<Integer>> newFactorTruths = newFactor.getCombinations();
             ArrayList<Double> newFactorValues = new ArrayList<>();
 
+            System.out.println("new factor truths: "+newFactorTruths.size());
+
             // Iterate through the new factors' truth combinations and calculate their values.
             for (int x = 0; x < newFactorTruths.size(); x++) {
                 ArrayList<Integer> truthCombination = newFactorTruths.get(x);
+                first.constructAndPrintCPT(true);
                 ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor, first);
+                System.out.println("F1 truth: " + f1Truth + " prob: " + first.getCPTProbability(f1Truth));
                 ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newFactor, second);
+                System.out.println("F2 truth: " + f2Truth + " prob: "+ second.getCPTProbability(f2Truth));
+
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
                 newFactorValues.add(value);
             }
 
+            System.out.println("DEBUG: COMPLETED TURN!!!");
             // reverse values orders.
             Collections.reverse(newFactorValues);
             newFactor.addCPTvalues(newFactorValues);
 
-//            System.out.println("DEBUG: INSIDE JOIN");
-//            newFactor.constructAndPrintCPT(true);
+            System.out.println("NEW FACTOR");
+            System.out.println("LABELS AFTER: "+newFactor.getNodeLabels());
+            newFactor.constructAndPrintCPT(true);
+            System.out.println("END");
 
-            first = newFactor;
+            //TODO: THiS IS THE PROBLEM
+            try {
+                first = newFactor.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
         }
 
         System.out.println("OUT OF JOIN SOON...");

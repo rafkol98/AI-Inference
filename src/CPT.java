@@ -16,6 +16,10 @@ public class CPT {
         this.valuesMap = new LinkedHashMap<>();
     }
 
+    public CPT clone() throws CloneNotSupportedException {
+        return (CPT) super.clone();
+    }
+
     public CPT(String nodeGivenLabel) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
@@ -96,6 +100,7 @@ public class CPT {
 
     private void populateMap() {
         // Get the number of nodes in this CPT.
+//        System.out.println("NODE LABELS: "+ nodeLabels);
         int numberNodes = nodeLabels.size();
         int size = (int) Math.pow(2, numberNodes);
         // Create truth tables.
@@ -111,6 +116,7 @@ public class CPT {
                 valuesTableRow.add(Character.getNumericValue(c));
             }
 
+//            System.out.println("INDEX "+ i + " OF SIZE: "+ size);
             double nodeValue = cptValues.get(i);
             valuesMap.put(valuesTableRow, nodeValue);
         }
