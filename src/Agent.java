@@ -309,6 +309,7 @@ public class Agent {
         // Join iteratively (two factors at a time).
         for (int i = 1; i < toSumOut.size(); i++) {
             System.out.println("SOSSS MESA");
+            first.constructAndPrintCPT(true);
             CPT second = toSumOut.get(i);
 
             System.out.println("FIRST AND SECOND INSIDE JOIN");
@@ -319,9 +320,11 @@ public class Agent {
             ArrayList<String> combined = getCombined(first, second);
             System.out.println("COMBINED "+ combined);
             System.out.println("BEFORE LABELS: "+  newFactor.getNodeLabels());
-
+            System.out.println("DEBUG UNO"+first.getNodeLabels());
             // Truth combinations to calculate.
             newFactor.setNodeLabels(combined);
+            System.out.println("DEBUG UNO"+first.getNodeLabels());
+
             // Get all the truth values combinations.
             ArrayList<ArrayList<Integer>> newFactorTruths = newFactor.getCombinations();
             ArrayList<Double> newFactorValues = new ArrayList<>();
@@ -352,11 +355,12 @@ public class Agent {
             System.out.println("END");
 
             //TODO: THiS IS THE PROBLEM
-            try {
-                first = newFactor.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
+            first = new CPT(newFactor);
+//            try {
+//                first = newFactor.clone();
+//            } catch (CloneNotSupportedException e) {
+//                e.printStackTrace();
+//            }
         }
 
         System.out.println("OUT OF JOIN SOON...");

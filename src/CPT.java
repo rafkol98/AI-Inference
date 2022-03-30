@@ -16,8 +16,14 @@ public class CPT {
         this.valuesMap = new LinkedHashMap<>();
     }
 
-    public CPT clone() throws CloneNotSupportedException {
-        return (CPT) super.clone();
+    // Deep Copy CPT.
+    public CPT(CPT copy) {
+        this.correspondentNode = copy.correspondentNode;
+        this.nodeGivenLabel = copy.nodeGivenLabel;
+        this.nodeLabels = copy.nodeLabels;
+        this.cptValues = copy.cptValues;
+        this.valuesMap = copy.valuesMap;
+        populateMap();
     }
 
     public CPT(String nodeGivenLabel) {
