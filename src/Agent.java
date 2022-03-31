@@ -25,6 +25,7 @@ public class Agent {
 
     public double variableElimination(String value, boolean evidence) {
         pruneIrrelevantVariables(evidence);
+        System.out.println("NEW ORDER: "+ order);
         ArrayList<CPT> factors = createSetFactors();
 
         // if we are performing variable elimination with evidence, then project evidence for related factors.
@@ -71,6 +72,7 @@ public class Agent {
 
     private void projectEvidence(ArrayList<CPT> factors) {
         for (String[] ev : evidences) {
+            System.out.println("INSIDE EVIDENCE - current evidence: "+ ev);
             // find the correspondent factor for current evidence label.
             CPT evFactor = getCorrespondentFactorForLabel(factors, ev[0]);
             boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
@@ -203,32 +205,50 @@ public class Agent {
 
         // set node labels everything except current label.
         ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());
-        ArrayList<String> nodeLabelsForIndexes = new ArrayList<>(newFactor.getNodeLabels());
-        Collections.reverse(nodeLabelsForIndexes);
-        int index = nodeLabelsForIndexes.indexOf(label);
-        System.out.println("DEBUG INDEX: " + index);
+        int index = nodeLabels.indexOf(label);
+        int sizeOfNodeLabels = nodeLabels.size();
 
+        System.out.println("DEBUG INDEX: " + index + " SIZE OF NODE LABELS-1: "+ (sizeOfNodeLabels-1));
+        System.out.println("label to marginalise: "+ label);
         if (nodeLabels.size() > 1) {
-            //TODO: maybe this is causing the problem.
             nodeLabels.remove(label);
             marginalised.setNodeLabels(nodeLabels);
 
-            int z = (int) Math.pow(2, index);
             int iterationSize = newFactor.getCptValues().size() / 2;
 
             // add the marginalised values.
             ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
 
-            if (index == 0) {
+            if (index == sizeOfNodeLabels - 1) {
+                System.out.println("DEBUG: WE ARE ALRIGHT!");
                 for (int i = 0; i < newFactor.getCptValues().size() - 1; i += 2) {
                     double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + 1);
                     marginalisedFactorValues.add(value);
                 }
             } else {
-                for (int i = 0; i < iterationSize; i++) {
-                    double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + z);
-                    marginalisedFactorValues.add(value);
+                System.out.println("MESA STO MATI TOU KIKLONA");
+                System.out.println("Combination"+newFactor.getCombinations());
+                System.out.println(newFactor.getCPTProbability(newFactor.getCombinations().get(0)));
+                ArrayList<ArrayList<Integer>> truthAlreadyTried = new ArrayList<>();
+                for (int i = 0; i < newFactor.getCptValues().size(); i++) {
+                    ArrayList<Integer> truthValuesForTrue = newFactor.getCombinations().get(i);
+                    ArrayList<Integer> truthValuesForFalse = newFactor.getCombinations().get(i);
+                    truthValuesForTrue.set(index, 1); // set value for true.
+                    truthValuesForFalse.set(index, 0); // set value for false.
+
+                    if (!truthAlreadyTried.contains(truthValuesForTrue) && !truthAlreadyTried.contains(truthValuesForFalse)) {
+                        System.out.println("TV T: "+truthValuesForTrue + " prob: "+ newFactor.getCPTProbability(truthValuesForTrue));
+                        System.out.println("TV F: "+truthValuesForFalse + " prob: "+ newFactor.getCPTProbability(truthValuesForFalse));
+//                    System.out.println("DEBUG inside - i is:"+ i + ", newFactor i:" + newFactor.getCptValues().get(i) + "newFactor i+z:" +  newFactor.getCptValues().get(i + z));
+                        double value = newFactor.getCPTProbability(truthValuesForTrue) + newFactor.getCPTProbability(truthValuesForFalse);
+                        marginalisedFactorValues.add(value);
+                        truthAlreadyTried.add(truthValuesForTrue);
+                        truthAlreadyTried.add(truthValuesForFalse);
+                        System.out.println("\n");
+                    }
+
                 }
+                Collections.reverse(marginalisedFactorValues); // reverse the values (Added different order).
             }
 
             marginalised.addCPTvalues(marginalisedFactorValues);
