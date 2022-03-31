@@ -15,8 +15,6 @@ import java.util.Scanner;
  * Feel free to change and delete parts of the code as you prefer
  *
  */
-
-
 public class A3main {
 
     public static void main(String[] args) {
@@ -41,8 +39,8 @@ public class A3main {
                 String value = query[1];
                 String[] order = getOrder(sc);
                 // execute query of p(variable=value) with given order of elimination
-                Agent ve = new Agent(bn, variable, order);
-                double result = ve.variableElimination(value, false);
+                VariableElimination ve = new VariableElimination(bn, variable, order);
+                double result = ve.runVE(value, false);
                 printResult(result);
             }
             break;
@@ -55,10 +53,10 @@ public class A3main {
                 String value = query[1];
                 String[] order = getOrder(sc);
                 ArrayList<String[]> evidence = getEvidence(sc);
-                Agent ve = new Agent(bn, variable, order, evidence);
+                VariableElimination ve = new VariableElimination(bn, variable, order, evidence);
 
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result =  ve.variableElimination(value, true);
+                double result =  ve.runVE(value, true);
 
                 printResult(result);
             }
@@ -72,12 +70,12 @@ public class A3main {
                 String value = query[1];
                 String[] order = bn.maximumCardinalitySearch(variable);
                 ArrayList<String[]> evidence = getEvidence(sc);
-                Agent ve = new Agent(bn, variable, order, evidence);
+                VariableElimination ve = new VariableElimination(bn, variable, order, evidence);
 
                 // execute query of p(variable=value|evidence) with given order of elimination
                 //print the order
                 System.out.println(Arrays.toString(order));
-                double result =  ve.variableElimination(value, true);
+                double result =  ve.runVE(value, true);
                 printResult(result);
             }
             break;

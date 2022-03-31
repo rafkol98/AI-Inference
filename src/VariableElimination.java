@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Agent {
+public class VariableElimination {
 
     // Initialise inputs.
     BayesianNetwork bn;
@@ -10,20 +10,26 @@ public class Agent {
     ArrayList<String[]> evidences;
 
 
-    public Agent(BayesianNetwork bn, String queried, String[] order) {
+    public VariableElimination(BayesianNetwork bn, String queried, String[] order) {
         this.bn = bn;
         this.queried = bn.getNode(queried);
         this.order = new ArrayList<>(Arrays.asList(order));
     }
 
-    public Agent(BayesianNetwork bn, String queried, String[] order, ArrayList<String[]> evidences) {
+    public VariableElimination(BayesianNetwork bn, String queried, String[] order, ArrayList<String[]> evidences) {
         this.bn = bn;
         this.queried = bn.getNode(queried);
         this.order = new ArrayList<>(Arrays.asList(order));
         this.evidences = evidences;
     }
 
-    public double variableElimination(String value, boolean evidence) {
+    /**
+     * Run the variable elimination algorithm.
+     * @param value the value being looked for - True or False?
+     * @param evidence the evidence given.
+     * @return
+     */
+    public double runVE(String value, boolean evidence) {
         pruneIrrelevantVariables(evidence);
         ArrayList<CPT> factors = createSetFactors();
 
@@ -62,6 +68,10 @@ public class Agent {
     }
 
 
+    /**
+     *
+     * @param factors
+     */
     private void projectEvidence(ArrayList<CPT> factors) {
         for (String[] ev : evidences) {
             // find the correspondent factor for current evidence label.
@@ -71,6 +81,11 @@ public class Agent {
         }
     }
 
+    /**
+     * Normalise the variables. Used to make probabilities in a table sum up to one.
+     * @param joined
+     * @return
+     */
     public CPT normalize(CPT joined) {
         ArrayList<Double> normalizedValues = new ArrayList<>();
         double trueValue = joined.getCPTSingleProb(1);
@@ -87,7 +102,7 @@ public class Agent {
     }
 
     /**
-     * Prunes all the irrelevant variables according to our task. If the vidence flag is true, then it deletes
+     * Prunes all the irrelevant variables according to our task. If the evidence flag is true, then it deletes
      * ancestors of the evidences.
      *
      * @param evidence

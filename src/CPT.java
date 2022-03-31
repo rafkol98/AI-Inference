@@ -122,7 +122,6 @@ public class CPT {
                 valuesTableRow.add(Character.getNumericValue(c));
             }
 
-//            System.out.println("INDEX "+ i + " OF SIZE: "+ size);
             double nodeValue = cptValues.get(i);
             valuesMap.put(valuesTableRow, nodeValue);
         }
@@ -185,7 +184,6 @@ public class CPT {
         String head = "";
         String parentsStr = "";
 
-
         int toRemove = correspondentNode == null ? 0 : 1;
         // iterate until the previous to the last (last is always the element of the CPT).
         for (int i = 0; i < nodeLabels.size() - toRemove; i++) {
@@ -196,7 +194,6 @@ public class CPT {
                 parentsStr += ",";
             }
         }
-
 
         // handle the case when node has parents.
         if (nodeLabels.size() > 1) {
@@ -230,7 +227,6 @@ public class CPT {
                 "nodeLabels=" + nodeLabels +
                 '}';
     }
-
 
     //TODO: change/improve!!!
     public ArrayList<ArrayList<Integer>> getCombinations() {
