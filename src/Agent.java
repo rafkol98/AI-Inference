@@ -25,28 +25,22 @@ public class Agent {
 
     public double variableElimination(String value, boolean evidence) {
         pruneIrrelevantVariables(evidence);
-        System.out.println("NEW ORDER: "+ order);
         ArrayList<CPT> factors = createSetFactors();
 
         // if we are performing variable elimination with evidence, then project evidence for related factors.
         if (evidence) {
             projectEvidence(factors);
         }
-        System.out.println("FACTORS: " + factors);
         CPT newFactor = null;
         // if order has at least one element, then perform variable elimination.
         if (order.size() >= 1) {
             for (String label : order) {
-                System.out.println("\n\nDEBUG LABEL: " + label);
                 ArrayList<CPT> toSumOut = getFactorsContainingLabel(label, factors); // get factors containing label.
-                System.out.println("toSumOut: " + toSumOut);
                 factors.removeAll(toSumOut); // remove all factors containing label.
 
                 // create a new factor with all variables in factors of ToSumOut but without label.
                 newFactor = joinMarginalise(toSumOut, label);
                 factors.add(newFactor); // add new factor.
-
-                System.out.println(factors);
             }
 
             if (evidence) {
@@ -62,8 +56,6 @@ public class Agent {
             newFactor = queried.getCpt();
         }
 
-        System.out.println("Order of elimination: "+order);
-        newFactor.constructAndPrintCPT(true);
         // Get the truth value that we are looking.
         int truthLooking = (value.equalsIgnoreCase("T")) ? 1 : 0;
         return newFactor.getCPTSingleProb(truthLooking);
@@ -72,12 +64,10 @@ public class Agent {
 
     private void projectEvidence(ArrayList<CPT> factors) {
         for (String[] ev : evidences) {
-            System.out.println("INSIDE EVIDENCE - current evidence: "+ ev);
             // find the correspondent factor for current evidence label.
             CPT evFactor = getCorrespondentFactorForLabel(factors, ev[0]);
             boolean truthToChange = (ev[1].equalsIgnoreCase("T")) ? true : false;
             evFactor.setToZero(truthToChange);
-            evFactor.constructAndPrintCPT(true);
         }
     }
 
@@ -201,63 +191,37 @@ public class Agent {
     // remove variable.
     private CPT marginalise(CPT newFactor, String label) {
         CPT marginalised = new CPT();
-        newFactor.constructAndPrintCPT(true);
-
         // set node labels everything except current label.
         ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());
         int index = nodeLabels.indexOf(label);
-        int sizeOfNodeLabels = nodeLabels.size();
 
-        System.out.println("DEBUG INDEX: " + index + " SIZE OF NODE LABELS-1: "+ (sizeOfNodeLabels-1));
-        System.out.println("label to marginalise: "+ label);
         if (nodeLabels.size() > 1) {
             nodeLabels.remove(label);
             marginalised.setNodeLabels(nodeLabels);
 
-            int iterationSize = newFactor.getCptValues().size() / 2;
-
             // add the marginalised values.
             ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
+            ArrayList<ArrayList<Integer>> truthAlreadyTried = new ArrayList<>();
+            for (int i = 0; i < newFactor.getCptValues().size(); i++) {
+                ArrayList<Integer> truthValuesForTrue = newFactor.getCombinations().get(i);
+                ArrayList<Integer> truthValuesForFalse = newFactor.getCombinations().get(i);
+                truthValuesForTrue.set(index, 1); // set value for true.
+                truthValuesForFalse.set(index, 0); // set value for false.
 
-            if (index == sizeOfNodeLabels - 1) {
-                System.out.println("DEBUG: WE ARE ALRIGHT!");
-                for (int i = 0; i < newFactor.getCptValues().size() - 1; i += 2) {
-                    double value = newFactor.getCptValues().get(i) + newFactor.getCptValues().get(i + 1);
+                if (!truthAlreadyTried.contains(truthValuesForTrue) && !truthAlreadyTried.contains(truthValuesForFalse)) {
+                    double value = newFactor.getCPTProbability(truthValuesForTrue) + newFactor.getCPTProbability(truthValuesForFalse);
                     marginalisedFactorValues.add(value);
+                    truthAlreadyTried.add(truthValuesForTrue);
+                    truthAlreadyTried.add(truthValuesForFalse);
                 }
-            } else {
-                System.out.println("MESA STO MATI TOU KIKLONA");
-                System.out.println("Combination"+newFactor.getCombinations());
-                System.out.println(newFactor.getCPTProbability(newFactor.getCombinations().get(0)));
-                ArrayList<ArrayList<Integer>> truthAlreadyTried = new ArrayList<>();
-                for (int i = 0; i < newFactor.getCptValues().size(); i++) {
-                    ArrayList<Integer> truthValuesForTrue = newFactor.getCombinations().get(i);
-                    ArrayList<Integer> truthValuesForFalse = newFactor.getCombinations().get(i);
-                    truthValuesForTrue.set(index, 1); // set value for true.
-                    truthValuesForFalse.set(index, 0); // set value for false.
 
-                    if (!truthAlreadyTried.contains(truthValuesForTrue) && !truthAlreadyTried.contains(truthValuesForFalse)) {
-                        System.out.println("TV T: "+truthValuesForTrue + " prob: "+ newFactor.getCPTProbability(truthValuesForTrue));
-                        System.out.println("TV F: "+truthValuesForFalse + " prob: "+ newFactor.getCPTProbability(truthValuesForFalse));
-//                    System.out.println("DEBUG inside - i is:"+ i + ", newFactor i:" + newFactor.getCptValues().get(i) + "newFactor i+z:" +  newFactor.getCptValues().get(i + z));
-                        double value = newFactor.getCPTProbability(truthValuesForTrue) + newFactor.getCPTProbability(truthValuesForFalse);
-                        marginalisedFactorValues.add(value);
-                        truthAlreadyTried.add(truthValuesForTrue);
-                        truthAlreadyTried.add(truthValuesForFalse);
-                        System.out.println("\n");
-                    }
-
-                }
-                Collections.reverse(marginalisedFactorValues); // reverse the values (Added different order).
             }
+            Collections.reverse(marginalisedFactorValues); // reverse the values (Added different order).
 
             marginalised.addCPTvalues(marginalisedFactorValues);
         } else if (nodeLabels.size() == 1) {
             marginalised.setNodeLabels(nodeLabels);
         }
-
-        System.out.println("MARGINALISED TABLE");
-        marginalised.constructAndPrintCPT(true);
         return marginalised;
     }
 
@@ -307,11 +271,7 @@ public class Agent {
         CPT first = toSumOut.get(0);
         // Join iteratively (two factors at a time).
         for (int i = 1; i < toSumOut.size(); i++) {
-            first.constructAndPrintCPT(true);
             CPT second = toSumOut.get(i);
-
-            first.constructAndPrintCPT(true);
-            second.constructAndPrintCPT(true);
 
             ArrayList<String> combined = getCombined(first, second);
             // Truth combinations to calculate.
@@ -330,22 +290,13 @@ public class Agent {
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
                 newFactorValues.add(value);
             }
-
-            System.out.println("DEBUG: COMPLETED TURN!!!");
             // reverse values orders.
             Collections.reverse(newFactorValues);
             newFactor.addCPTvalues(newFactorValues);
 
-            System.out.println("NEW FACTOR");
-            System.out.println("LABELS AFTER: " + newFactor.getNodeLabels());
-            newFactor.constructAndPrintCPT(true);
-            System.out.println("END");
-
-            //TODO: THiS IS THE PROBLEM
-            first = new CPT(newFactor);
+            first = new CPT(newFactor); // make a deep copy.
         }
 
-        System.out.println("OUT OF JOIN SOON...");
         return newFactor;
     }
 
@@ -360,7 +311,7 @@ public class Agent {
         ArrayList<String> v1 = variablesBoth(first, second); // variables in both.
         ArrayList<String> v2 = variablesNotInSecond(first, second); // variables in the first but not second.
         ArrayList<String> v3 = variablesNotInSecond(second, first); // variables in the second but not first.
-        // Combine three arraylists. TODO: maybe function it.
+        // Combine three arraylists.
         ArrayList<String> combined = new ArrayList<String>();
         combined.addAll(v1);
         combined.addAll(v2);

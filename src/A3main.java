@@ -146,9 +146,6 @@ public class A3main {
                 b.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
                 c.getCpt().addCPTvalues(0.7, 0.3, 0.9, 0.1);
                 d.getCpt().addCPTvalues(0.4, 0.6, 0.6, 0.4);
-
-                System.out.println("DEBUG PRINT NETWORK");
-                bn.printNetwork();
                 break;
             case "BNB":
                 // Add nodes.
