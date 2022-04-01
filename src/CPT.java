@@ -221,6 +221,7 @@ public class CPT {
         return valuesMap.get(truthValues);
     }
 
+
     @Override
     public String toString() {
         return "CPT{" +

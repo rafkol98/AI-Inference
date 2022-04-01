@@ -270,7 +270,7 @@ public class VariableElimination {
         return factorTruth;
     }
 
-    private CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
+    public CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
         CPT newFactor;
         if (toSumOut.size() > 1) {
             newFactor = join(toSumOut, label);
@@ -284,7 +284,7 @@ public class VariableElimination {
 
 
     //TODO: improve!
-    public CPT join(ArrayList<CPT> toSumOut, String label) {
+    private CPT join(ArrayList<CPT> toSumOut, String label) {
         CPT newFactor = new CPT(label);
         CPT first = toSumOut.get(0);
         // Join iteratively (two factors at a time).

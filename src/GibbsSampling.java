@@ -1,7 +1,6 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 public class GibbsSampling {
 
@@ -22,28 +21,30 @@ public class GibbsSampling {
         int countTrue, countFalse  = 0;
 
         ArrayList<Node> nonEvidences = getNonEvidences();
-
-        HashMap<Node, String> nonEvidenceAssignment = assignNonEvidence(nonEvidences); // initialising some random values by random guess.
-
+        System.out.println("NON EVIDENCES "+ nonEvidences);
+        HashMap<String, Integer> nonEvidenceAssignment = assignNonEvidence(nonEvidences); // initialising some random values by random guess.
+        System.out.println(nonEvidenceAssignment);
         for(int i=0; i<samples; i++) {
             // iteratively sample each one of the nodes in the non-evidence set from their FULL conditional (everybody
             // else except itself). Using the previous sample.
-            for (Node nonEvidenceNode : nonEvidenceAssignment.keySet()) {
+            for (Node nonEvidenceNode : nonEvidences) {
+                System.out.println("Non evidence node: "+ nonEvidenceNode);
                 // Get all CPTs required to look at their full conditional probability.
-                ArrayList<CPT> appropriateCPTs = getAppropriateCPTs(nonEvidenceNode, nonEvidences);
-                CPT joined = ve.join(appropriateCPTs, nonEvidenceNode.getLabel());
-                System.out.println("non-evidence node: "+ nonEvidenceNode);
-                System.out.println("CPT table");
-                joined.constructAndPrintCPT(true);
-                System.out.println("\n");
+                ArrayList<CPT> appropriateCPTs = getAppropriateCPTs(nonEvidences);
+                CPT fullCPT = ve.joinMarginalise(appropriateCPTs, nonEvidenceNode.getLabel());
+                fullCPT.constructAndPrintCPT(true);
 
+                System.out.println("NODE LABELS CPT: "+ fullCPT.getNodeLabels());
+                System.out.println("PROB FOR CONDITIONS: "+ getProbabilityForConditions(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
+
+//                getProbabilityForConditions(nonEvidences, nonEvidenceNode);
             }
         }
         return -1;
     }
 
     public ArrayList<Node> getNonEvidences() {
-        ArrayList<Node> nonEvidences = bn.getNodes(); // initialise all the BN nodes.
+        ArrayList<Node> nonEvidences = new ArrayList<>(bn.getNodes()); // initialise all the BN nodes.
         ArrayList<Node> evidencesList = new ArrayList<>();
 
         for (String[] evidence : evidences) {
@@ -53,40 +54,75 @@ public class GibbsSampling {
         return nonEvidences;
     }
 
-    public HashMap<Node, String> assignNonEvidence(ArrayList<Node> nonEvidences) {
-        HashMap<Node, String> nonEvidenceAssignment = new HashMap<>();
-        String[] possibleValues={"T", "F"};
+    public HashMap<String, Integer> assignNonEvidence(ArrayList<Node> nonEvidences) {
+        HashMap<String, Integer> nonEvidenceAssignment = new HashMap<>();
+        Integer[] possibleValues={0, 1};
         Random r=new Random();
         // Assign a random value (out of the true possible) to each non-evidence variable.
         for (Node nonEvidence : nonEvidences) {
             int randomNumber = r.nextInt(possibleValues.length);
-            String randomValue = possibleValues[randomNumber];
-            nonEvidenceAssignment.put(nonEvidence, randomValue);
+            int randomValue = possibleValues[randomNumber];
+            nonEvidenceAssignment.put(nonEvidence.getLabel(), randomValue);
         }
         return nonEvidenceAssignment;
     }
 
 
-    public ArrayList<CPT> getAppropriateCPTs(Node currentNonEv, ArrayList<Node> nonEvidences) {
+    public ArrayList<CPT> getAppropriateCPTs(ArrayList<Node> nonEvidences) {
         ArrayList<CPT> factors = new ArrayList<>();
+        // Create a new LinkedHashSet
+        Set<CPT> set = new LinkedHashSet<>();
 
         // iterate through the nodes of the BN.
-        for (Node node : bn.getNodes()) {
-            // add all the non evidence factors except itself
-            if (!node.equals(currentNonEv)) {
-                factors.add(node.getCpt());
-            }
+        for (Node node : nonEvidences) {
+            set.add(node.getCpt());
         }
+
         // add the CPTs of the evidence nodes.
         for (String[] evidence : evidences) {
-            System.out.println("ev dame"+evidence[0]);
-            System.out.println(bn.getNodes());
             Node evidenceNode = bn.getNode(evidence[0]);
-            System.out.println(evidenceNode);
-            factors.add(evidenceNode.getCpt());
+            set.add(evidenceNode.getCpt());
         }
+
+        factors.addAll(set);
 
         return factors;
     }
 
+    public ArrayList<String> getProbabilityForConditions(Node currentEvidence, CPT fullCPT, HashMap<String, Integer> nonEvidenceAssignment) {
+        // Get the labels in the correct order.
+        ArrayList<String> conditionsUsed = (ArrayList<String>) bn.getNodes().stream().map(e -> e.getLabel()).collect(toList());
+        conditionsUsed.remove(currentEvidence.getLabel());
+        conditionsUsed.sort(Comparator.comparingInt(fullCPT.getNodeLabels()::indexOf));
+
+        System.out.println("non ev assign "+ nonEvidenceAssignment);
+        System.out.println(conditionsUsed);
+        System.out.println("DAME" + getCorrespondingTruth(conditionsUsed, nonEvidenceAssignment));
+
+       return conditionsUsed;
+    }
+
+    public ArrayList<Integer> getCorrespondingTruth(ArrayList<String> conditionsUsed, HashMap<String, Integer> nonEvidenceAssignment) {
+        ArrayList<Integer> truthValues = new ArrayList<>();
+
+        // Add all the binary values from the nonEvidence assignment map.
+        for (String condition: conditionsUsed) {
+            System.out.println("condition "+ condition);
+            if (nonEvidenceAssignment.keySet().contains(condition)) {
+                System.out.println("MESA non-evidence: "+ condition);
+                truthValues.add(nonEvidenceAssignment.get(condition));
+            }
+            // add all the values in the evidences array.
+            else {
+                for (String[] evidence : evidences) {
+                    if (evidence[0].equalsIgnoreCase(condition)) {
+                        System.out.println("MESA evidence: " + condition);
+                        int truthLooking = (evidence[1].equalsIgnoreCase("T")) ? 1 : 0;
+                        truthValues.add(truthLooking);
+                    }
+                }
+            }
+        }
+        return truthValues;
+    }
 }
