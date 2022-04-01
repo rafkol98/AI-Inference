@@ -53,7 +53,13 @@ public class GibbsSampling {
             }
         }
         System.out.println(allValuesAssigned);
-        return getNumberOfOccurences(allValuesAssigned, queried, value);
+        int numberOfOccurences = getNumberOfOccurences(allValuesAssigned, queried, value);
+        System.out.println(numberOfOccurences);
+        System.out.println(samples);
+
+        double returnVal = (double) numberOfOccurences/ (double) samples;
+        System.out.println(returnVal);
+        return returnVal;
     }
 
     public ArrayList<Node> getNonEvidences() {
