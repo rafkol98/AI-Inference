@@ -1,6 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class VariableElimination {
 
     // Initialise inputs.
@@ -181,7 +182,7 @@ public class VariableElimination {
         for (CPT factor : factors) {
             Node node = bn.getNode(label);
             // if the corresponding node for that
-            if (factor.getCorrespondentNode().equals(node)) {
+            if (factor.getCorrespondingNode().equals(node)) {
                 return factor;
             }
         }

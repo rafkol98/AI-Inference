@@ -1,10 +1,15 @@
+/**
+ * Create a new edge connection between two nodes.
+ * @author: 210017984
+ */
 public class Edge {
 
-    private Node first;  // first node.
-    private Node second;  // Second node.
+    // initialise variables.
+    private Node first;
+    private Node second;
 
     /**
-     * Create a new Edge.
+     * Create a new Edge connection between two nodes.
      * @param first the first node in the edge connection.
      * @param second the second node in the edge connection.
      */
@@ -15,5 +20,19 @@ public class Edge {
         first.addChild(second); // add first as child.
     }
 
+    /**
+     * Get first node in the connection.
+     * @return first node in the edge connection.
+     */
+    public Node getFirst() {
+        return first;
+    }
 
+    /**
+     * Get second node in the connection.
+     * @return second node in the edge connection.
+     */
+    public Node getSecond() {
+        return second;
+    }
 }

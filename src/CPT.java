@@ -4,22 +4,33 @@ import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+/**
+ * Create a new CPT table.
+ * @author: 210017984
+ */
 public class CPT {
-    private Node correspondentNode;
+
+    // initialise variables.
+    private Node correspondingNode;
     private String nodeGivenLabel; // label of the given node.
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
     private LinkedHashMap<ArrayList<Integer>, Double> valuesMap;
     private VariableElimination ve;
 
+    /**
+     * Create a new CPT.
+     */
     public CPT() {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
     }
 
-    // Deep Copy CPT.
+    /**
+     * Create a deep copy of an existing CPT.
+     */
     public CPT(CPT copy) {
-        this.correspondentNode = copy.correspondentNode;
+        this.correspondingNode = copy.correspondingNode;
         this.nodeGivenLabel = copy.nodeGivenLabel;
         this.nodeLabels = copy.nodeLabels;
         this.cptValues = copy.cptValues;
@@ -27,19 +38,92 @@ public class CPT {
         populateMap();
     }
 
+    /**
+     * Create a new CPT given a node label. Used to create temporary CPTs
+     * in the join operation.
+     * @param nodeGivenLabel a node's label.
+     */
     public CPT(String nodeGivenLabel) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
         this.nodeGivenLabel = nodeGivenLabel;
     }
 
-    public CPT(Node correspondentNode) {
+    /**
+     * Create a new CPT associated belonging to a given node.
+     * @param correspondingNode the node that the CPT table will
+     *                          belong to.
+     */
+    public CPT(Node correspondingNode) {
         this.nodeLabels = new ArrayList<>();
         this.valuesMap = new LinkedHashMap<>();
-        this.correspondentNode = correspondentNode;
-        this.nodeGivenLabel = correspondentNode.getLabel();
+        this.correspondingNode = correspondingNode;
+        this.nodeGivenLabel = correspondingNode.getLabel();
     }
 
+    /**
+     * Set node labels to the CPT.
+     * @param nodeLabels the node labels of the CPT
+     */
+    public void setNodeLabels(ArrayList<String> nodeLabels) {
+        this.nodeLabels = nodeLabels;
+    }
+
+    /**
+     * Get corresponding (owning) node of the CPT.
+     * @return corresponding node of the CPT.
+     */
+    public Node getCorrespondingNode() {
+        return correspondingNode;
+    }
+
+    /**
+     * Get CPT's node labels.
+     * @return the labels of the CPT.
+     */
+    public ArrayList<String> getNodeLabels() {
+        return nodeLabels;
+    }
+
+    /**
+     * Get CPT's values.
+     * @return the values of the CPT.
+     */
+    public ArrayList<Double> getCptValues() {
+        return cptValues;
+    }
+
+    /**
+     * Add CPT values both in the arraylist and the truth - value map. Used mainly
+     * when creating a new Bayesian Network - add multiple values at once without ArrayList.
+     * @param values the values to be added to the CPT.
+     */
+    public void addCPTvalues(double... values) {
+        ArrayList<Node> nodesUsedForLabels = new ArrayList<>();
+        //
+        nodesUsedForLabels.addAll(correspondingNode.getParents());
+        nodesUsedForLabels.add(correspondingNode);
+        // populate node labels ArrayList.
+        for (Node n : nodesUsedForLabels) {
+            this.nodeLabels.add(n.getLabel());
+        }
+        this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
+        populateMap();
+    }
+
+    /**
+     * Add CPT values in the form of an ArrayList both in the arraylist and the truth - value map.
+     * @param values the values to be added to the CPT.
+     */
+    public void addCPTvalues(ArrayList<Double> values) {
+        this.cptValues = values;
+        populateMap();
+    }
+
+    /**
+     * Update the CPT values both in the arraylist and the map.
+     * @param newValues the new values to be updated.
+     */
     public void updateCPTvalues(ArrayList<Double> newValues) {
         for (int i=0; i<newValues.size(); i++) {
             cptValues.set(i,newValues.get(i));
@@ -47,15 +131,21 @@ public class CPT {
         populateMap();
     }
 
+    /**
+     * Get a seeked truth value for the corresponding's node marginalised
+     * CPT table - this is only used for gibbs sampling.
+     * @param value the value we want - can be either 1 or 0 (binary).
+     * @return the CPT probability.
+     */
     public double getCorrespondingNodeTruthValue(int value) {
         ve = new VariableElimination();
-        int index = nodeLabels.indexOf(correspondentNode.getLabel()); // get index of node label.
+        int index = nodeLabels.indexOf(correspondingNode.getLabel()); // get index of node label.
 
         ArrayList<String> nodeLabelsWithoutCorresponding = new ArrayList<>(nodeLabels);
-        nodeLabelsWithoutCorresponding.remove(correspondentNode.getLabel());
+        nodeLabelsWithoutCorresponding.remove(correspondingNode.getLabel());
         CPT tempCPT = new CPT(this);
 
-        // first we need to marginalise the table so that only the own probability remains.
+        // Marginalise the table so that only the own probability remains.
         for (String label : nodeLabelsWithoutCorresponding) {
             tempCPT = ve.marginalise(tempCPT, label);
         }
@@ -64,34 +154,10 @@ public class CPT {
         return tempCPT.getCPTSingleProb(value);
     }
 
-    public void setNodeLabels(ArrayList<String> nodeLabels) {
-        this.nodeLabels = nodeLabels;
-    }
-
-    public Node getCorrespondentNode() {
-        return correspondentNode;
-    }
-
-    public HashMap<ArrayList<Integer>, Double> getValuesMap() {
-        return valuesMap;
-    }
-
-    public ArrayList<String> getNodeLabels() {
-        return nodeLabels;
-    }
-
-    public ArrayList<Double> getCptValues() {
-        return cptValues;
-    }
-
-    public void addCPTvalues(ArrayList<Double> values) {
-        this.cptValues = values;
-        populateMap();
-    }
-
     /**
-     * Set CPT values to zeros accordingly to evidence.
-     * @param changeTrueVals
+     * Set CPT values to zeros according to evidence.
+     * @param changeTrueVals if true sets all the false values to zero, and
+     *                       vice versa.
      */
     public void setToZero(boolean changeTrueVals) {
         if (changeTrueVals) {
@@ -111,22 +177,15 @@ public class CPT {
         populateMap();
     }
 
-    public void addCPTvalues(double... values) {
-        ArrayList<Node> nodesUsedForLabels = new ArrayList<>();
-        nodesUsedForLabels.addAll(correspondentNode.getParents());
-        nodesUsedForLabels.add(correspondentNode);
-        // populate node labels ArrayList.
-        for (Node n : nodesUsedForLabels) {
-            this.nodeLabels.add(n.getLabel());
-        }
-        this.cptValues = DoubleStream.of(values).boxed().collect(Collectors.toCollection(ArrayList::new));
-    }
 
+    /**
+     * Populate the truth combination - value map.
+     */
     private void populateMap() {
-        // Get the number of nodes in this CPT.
-//        System.out.println("NODE LABELS: "+ nodeLabels);
+        // Get the number of nodes in this CPT and the size of rows.
         int numberNodes = nodeLabels.size();
         int size = (int) Math.pow(2, numberNodes);
+
         // Create truth tables.
         for (int i = 0; i < size; i++) {
             // ArrayList stores all the values for the current column. Used as key for the HashMap
@@ -140,6 +199,7 @@ public class CPT {
                 valuesTableRow.add(Character.getNumericValue(c));
             }
 
+            // add/update CPT values.
             double nodeValue = cptValues.get(i);
             valuesMap.put(valuesTableRow, nodeValue);
         }
@@ -152,7 +212,6 @@ public class CPT {
     public void constructAndPrintCPT(boolean print) {
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
-
         int size = (int) Math.pow(2, numberNodes);
 
         if (print) {
@@ -192,8 +251,6 @@ public class CPT {
                     valuesMap.put(valuesTableRow, 0.0);
                 }
             }
-
-
         }
     }
 
@@ -202,7 +259,7 @@ public class CPT {
         String head = "";
         String parentsStr = "";
 
-        int toRemove = correspondentNode == null ? 0 : 1;
+        int toRemove = correspondingNode == null ? 0 : 1;
         // iterate until the previous to the last (last is always the element of the CPT).
         for (int i = 0; i < nodeLabels.size() - toRemove; i++) {
             head += nodeLabels.get(i) + "\t";
@@ -227,13 +284,23 @@ public class CPT {
         }
     }
 
-    //TODO: improve!
+    /**
+     * Get a single probability in a CPT with only one variable.
+     * @param truth the value we are looking (1 or 0 - binary).
+     * @return
+     */
     public double getCPTSingleProb(int truth) {
         ArrayList<Integer> temp = new ArrayList<>();
         temp.add(truth);
         return valuesMap.get(temp);
     }
 
+    /**
+     * Get CPT probability for a combination fo truth values - used when multiple
+     * variable combinations in the CPT table.
+     * @param truthValues
+     * @return
+     */
     public double getCPTProbability(ArrayList<Integer> truthValues) {
         populateMap();
         return valuesMap.get(truthValues);
@@ -280,8 +347,6 @@ public class CPT {
 
     /**
      * Normalise the variables. Used to make probabilities in a table sum up to one.
-     * @param joined
-     * @return
      */
     public void normalize() {
         // store the normalized values.

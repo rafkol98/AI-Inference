@@ -3,15 +3,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Create a new Bayesian Network instance.
+ * @author: 210017984
+ */
 public class BayesianNetwork {
+
+    // initialise variables.
     private ArrayList<Node> nodes;
     private ArrayList<Edge> edges;
 
+    /**
+     * Create a new Bayesian Network.
+     */
     public BayesianNetwork() {
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
     }
 
+    /**
+     * Get all the nodes of the bayesian network.
+     * @return the BN nodes.
+     */
     public ArrayList<Node> getNodes() {
         return nodes;
     }
@@ -62,7 +75,7 @@ public class BayesianNetwork {
 
     /**
      * The maximum cardinality search algorithm for deciding order.
-     * @param queriedLabel the label of the queried label
+     * @param queriedLabel the label of the queried label.
      * @return the best visiting order derived with this algorithm.
      */
     public String[] maximumCardinalitySearch(String queriedLabel) {
