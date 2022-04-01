@@ -34,10 +34,17 @@ public class GibbsSampling {
                 CPT fullCPT = ve.joinMarginalise(appropriateCPTs, nonEvidenceNode.getLabel());
                 fullCPT.constructAndPrintCPT(true);
 
+                double probConds = fullCPT.getCPTProbability(getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
+                nonEvidenceNode.getCpt().constructAndPrintCPT(true);
                 System.out.println("NODE LABELS CPT: "+ fullCPT.getNodeLabels());
-                System.out.println("PROB FOR CONDITIONS: "+ getProbabilityForConditions(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
+                System.out.println("PROB FOR CONDITIONS: "+ getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
+                System.out.println("value for one: "+nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(1));
+                double postTrue = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(1) * probConds;
+                double postFalse = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(0) * probConds;
+                System.out.println("POST tRUE: "+postTrue);
+                System.out.println("POST FALSE: "+postFalse);
 
-//                getProbabilityForConditions(nonEvidences, nonEvidenceNode);
+                getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment);
             }
         }
         return -1;
@@ -89,34 +96,27 @@ public class GibbsSampling {
         return factors;
     }
 
-    public ArrayList<String> getProbabilityForConditions(Node currentEvidence, CPT fullCPT, HashMap<String, Integer> nonEvidenceAssignment) {
+    public ArrayList<Integer> getTruthValuesForCondition(Node currentEvidence, CPT fullCPT, HashMap<String, Integer> nonEvidenceAssignment) {
         // Get the labels in the correct order.
         ArrayList<String> conditionsUsed = (ArrayList<String>) bn.getNodes().stream().map(e -> e.getLabel()).collect(toList());
         conditionsUsed.remove(currentEvidence.getLabel());
         conditionsUsed.sort(Comparator.comparingInt(fullCPT.getNodeLabels()::indexOf));
 
-        System.out.println("non ev assign "+ nonEvidenceAssignment);
-        System.out.println(conditionsUsed);
-        System.out.println("DAME" + getCorrespondingTruth(conditionsUsed, nonEvidenceAssignment));
-
-       return conditionsUsed;
+       return assignTruth(conditionsUsed, nonEvidenceAssignment);
     }
 
-    public ArrayList<Integer> getCorrespondingTruth(ArrayList<String> conditionsUsed, HashMap<String, Integer> nonEvidenceAssignment) {
+    public ArrayList<Integer> assignTruth(ArrayList<String> conditionsUsed, HashMap<String, Integer> nonEvidenceAssignment) {
         ArrayList<Integer> truthValues = new ArrayList<>();
 
         // Add all the binary values from the nonEvidence assignment map.
         for (String condition: conditionsUsed) {
-            System.out.println("condition "+ condition);
             if (nonEvidenceAssignment.keySet().contains(condition)) {
-                System.out.println("MESA non-evidence: "+ condition);
                 truthValues.add(nonEvidenceAssignment.get(condition));
             }
             // add all the values in the evidences array.
             else {
                 for (String[] evidence : evidences) {
                     if (evidence[0].equalsIgnoreCase(condition)) {
-                        System.out.println("MESA evidence: " + condition);
                         int truthLooking = (evidence[1].equalsIgnoreCase("T")) ? 1 : 0;
                         truthValues.add(truthLooking);
                     }
@@ -125,4 +125,8 @@ public class GibbsSampling {
         }
         return truthValues;
     }
+
+//    public double getProbabilityInOwnTable(probConds) {
+//
+//    }
 }

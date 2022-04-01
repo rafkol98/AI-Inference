@@ -84,25 +84,7 @@ public class VariableElimination {
         }
     }
 
-    /**
-     * Normalise the variables. Used to make probabilities in a table sum up to one.
-     * @param joined
-     * @return
-     */
-    public CPT normalize(CPT joined) {
-        ArrayList<Double> normalizedValues = new ArrayList<>();
-        double trueValue = joined.getCPTSingleProb(1);
-        double falseValue = joined.getCPTSingleProb(0);
-        double sumValue = trueValue + falseValue;
 
-        normalizedValues.add(falseValue / sumValue); // add normalised false value.
-        normalizedValues.add(trueValue / sumValue); // add normalized true value.
-
-        // update joined CPT values.
-        joined.updateCPTvalues(normalizedValues);
-
-        return joined;
-    }
 
     /**
      * Prunes all the irrelevant variables according to our task. If the evidence flag is true, then it deletes
@@ -207,7 +189,7 @@ public class VariableElimination {
     }
 
     // remove variable.
-    private CPT marginalise(CPT newFactor, String label) {
+    public CPT marginalise(CPT newFactor, String label) {
         CPT marginalised = new CPT();
         // set node labels everything except current label.
         ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());

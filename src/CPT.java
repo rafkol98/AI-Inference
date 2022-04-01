@@ -10,6 +10,7 @@ public class CPT {
     private ArrayList<String> nodeLabels;
     private ArrayList<Double> cptValues; // contains a value for each combination.
     private LinkedHashMap<ArrayList<Integer>, Double> valuesMap;
+    private VariableElimination ve;
 
     public CPT() {
         this.nodeLabels = new ArrayList<>();
@@ -44,6 +45,40 @@ public class CPT {
             cptValues.set(i,newValues.get(i));
         }
         populateMap();
+    }
+
+    public double getCorrespondingNodeTruthValue(int value) {
+        ve = new VariableElimination();
+        int index = nodeLabels.indexOf(correspondentNode.getLabel()); // get index of node label.
+
+        ArrayList<String> nodeLabelsWithoutCorresponding = new ArrayList<>(nodeLabels);
+        nodeLabelsWithoutCorresponding.remove(correspondentNode.getLabel());
+        CPT tempCPT = new CPT(this);
+        System.out.println("TEMPCPT"+tempCPT);
+        // first we need to marginalise the table so that only the own probability remains.
+        for (String label : nodeLabelsWithoutCorresponding) {
+            tempCPT = ve.marginalise(tempCPT, label);
+            System.out.println("AFTER ITER: "+ tempCPT);
+        }
+
+        tempCPT.constructAndPrintCPT(true);
+
+//
+//        ArrayList<ArrayList<Integer>> suitableKeys = new ArrayList<>();
+//        // find all the suitable keys - where the value for the corresponding node is equal to the
+//        // passed in value.
+//        for (ArrayList<Integer> key : valuesMap.keySet()) {
+//            if (key.get(index) == value) {
+//                suitableKeys.add(key);
+//            }
+//        }
+//
+//        double valueSummed = 0;
+//        for (ArrayList<Integer> key: suitableKeys) {
+//            valueSummed += valuesMap.get(key);
+//        }
+
+        return  tempCPT.getCPTSingleProb(value);
     }
 
     public void setNodeLabels(ArrayList<String> nodeLabels) {
@@ -258,6 +293,24 @@ public class CPT {
             space = space / 2;
         }
         return trueValues;
+    }
+
+    /**
+     * Normalise the variables. Used to make probabilities in a table sum up to one.
+     * @param joined
+     * @return
+     */
+    public void normalize() {
+        ArrayList<Double> normalizedValues = new ArrayList<>();
+        double trueValue = getCPTSingleProb(1);
+        double falseValue = getCPTSingleProb(0);
+        double sumValue = trueValue + falseValue;
+
+        normalizedValues.add(falseValue / sumValue); // add normalised false value.
+        normalizedValues.add(trueValue / sumValue); // add normalized true value.
+
+        // update joined CPT values.
+        updateCPTvalues(normalizedValues);
     }
 
 }
