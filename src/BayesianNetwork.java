@@ -16,6 +16,11 @@ public class BayesianNetwork {
         return nodes;
     }
 
+    /**
+     * Get a node in the bayesian network given its label.
+     * @param label the label of the node.
+     * @return the node in the bayesian network.
+     */
     public Node getNode(String label) {
         for (Node node : nodes) {
             if (node.getLabel().equalsIgnoreCase(label)) {
@@ -26,8 +31,8 @@ public class BayesianNetwork {
     }
 
     /**
-     * Add a node to the BN.
-     * @param label
+     * Creates and adds a new node to the Bayesian Network.
+     * @param label the label of the new node to be added.
      */
     public Node addNode(String label) {
         Node node = new Node(label);
@@ -37,8 +42,8 @@ public class BayesianNetwork {
 
     /**
      * Add an edge to the BN.
-     * @param first
-     * @param second
+     * @param first the first node in the edge.
+     * @param second the second node in the edge.
      */
     public void addEdge(Node first, Node second) {
         Edge edge = new Edge(first, second);
@@ -55,10 +60,10 @@ public class BayesianNetwork {
         }
     }
 
-    //TODO: maybe move them in another class.
     /**
      * The maximum cardinality search algorithm for deciding order.
-     * @return
+     * @param queriedLabel the label of the queried label
+     * @return the best visiting order derived with this algorithm.
      */
     public String[] maximumCardinalitySearch(String queriedLabel) {
         Node queried = getNode(queriedLabel); // get queried node.
@@ -69,6 +74,7 @@ public class BayesianNetwork {
         // the queried node is the starting node.
         marked.add(queried);
 
+        // iterate through all the network's nodes and mark every time the label with the maximum marked neighbours.
         for (int i = 0; i < nodes.size(); i++) {
             Node labelWithMaxMarkedNeighbours = findMaximumNumberOfMarkedNeighbours(unmarked, marked);
             order.add(labelWithMaxMarkedNeighbours.getLabel());
@@ -76,7 +82,7 @@ public class BayesianNetwork {
             marked.add(labelWithMaxMarkedNeighbours); // add label to the marked list.
         }
         Collections.reverse(order); // reverse order
-        order.remove(queried.getLabel()); // remove queried label from the order list.
+        order.remove(queriedLabel); // remove queried label from the order list.
 
         return order.toArray(new String[order.size()]);
     }
