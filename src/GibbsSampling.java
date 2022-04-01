@@ -19,10 +19,10 @@ public class GibbsSampling {
     public double gibbsAsk(int samples) {
         // a vector of counts for each value of the queried variable - since binary and only one queried variable, the counts size are equal to 2.
         int countTrue, countFalse  = 0;
-
+        HashMap<String, ArrayList<Integer>> allValuesAssigned = new HashMap<>();
         ArrayList<Node> nonEvidences = getNonEvidences();
         System.out.println("NON EVIDENCES "+ nonEvidences);
-        HashMap<String, Integer> nonEvidenceAssignment = assignNonEvidence(nonEvidences); // initialising some random values by random guess.
+        HashMap<String, Integer> nonEvidenceAssignment = assignNonEvidence(allValuesAssigned, nonEvidences); // initialising some random values by random guess.
         System.out.println(nonEvidenceAssignment);
         for(int i=0; i<samples; i++) {
             // iteratively sample each one of the nodes in the non-evidence set from their FULL conditional (everybody
@@ -36,17 +36,24 @@ public class GibbsSampling {
 
                 double probConds = fullCPT.getCPTProbability(getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
                 nonEvidenceNode.getCpt().constructAndPrintCPT(true);
-                System.out.println("NODE LABELS CPT: "+ fullCPT.getNodeLabels());
-                System.out.println("PROB FOR CONDITIONS: "+ getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
-                System.out.println("value for one: "+nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(1));
+
                 double postTrue = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(1) * probConds;
                 double postFalse = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(0) * probConds;
-                System.out.println("POST tRUE: "+postTrue);
-                System.out.println("POST FALSE: "+postFalse);
 
-                getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment);
+                double[] normalizedProb = normalizedProbs(postTrue, postFalse);
+                System.out.println("NORMALIZED PROB: "+normalizedProb);
+                double prediction =  Math.random();
+                System.out.println("DEBUG PREDICTION: "+prediction + " norm prob 0: "+normalizedProb[0]);
+                int value = prediction <= normalizedProb[0] ? 0 : 1;
+                nonEvidenceAssignment.put(nonEvidenceNode.getLabel(), value);
+                ArrayList<Integer> valuesSoFar = allValuesAssigned.get(nonEvidenceNode.getLabel());
+                // add new value sampled.
+                valuesSoFar.add(value);
+                // update arraylist of map to reflect to include the enw sample.
+                allValuesAssigned.put(nonEvidenceNode.getLabel(), valuesSoFar);
             }
         }
+        System.out.println(allValuesAssigned);
         return -1;
     }
 
@@ -61,7 +68,7 @@ public class GibbsSampling {
         return nonEvidences;
     }
 
-    public HashMap<String, Integer> assignNonEvidence(ArrayList<Node> nonEvidences) {
+    public HashMap<String, Integer> assignNonEvidence(HashMap<String, ArrayList<Integer>> valuesAssignedForEach, ArrayList<Node> nonEvidences) {
         HashMap<String, Integer> nonEvidenceAssignment = new HashMap<>();
         Integer[] possibleValues={0, 1};
         Random r=new Random();
@@ -70,6 +77,11 @@ public class GibbsSampling {
             int randomNumber = r.nextInt(possibleValues.length);
             int randomValue = possibleValues[randomNumber];
             nonEvidenceAssignment.put(nonEvidence.getLabel(), randomValue);
+
+            // New ArrayList is created to store the value - happens here because its the first assignment.
+            ArrayList<Integer> valueAdded = new ArrayList<>();
+            valueAdded.add(randomValue);
+            valuesAssignedForEach.put(nonEvidence.getLabel(), valueAdded);
         }
         return nonEvidenceAssignment;
     }
@@ -126,7 +138,11 @@ public class GibbsSampling {
         return truthValues;
     }
 
-//    public double getProbabilityInOwnTable(probConds) {
-//
-//    }
+    public double[] normalizedProbs(double probTrue, double probFalse) {
+        double[] normalized = new double[2];
+        normalized[0] = probTrue / (probTrue + probFalse); // normalized true.
+        normalized[1] = probFalse / (probTrue + probFalse); // normalized false.
+
+        return normalized;
+    }
 }

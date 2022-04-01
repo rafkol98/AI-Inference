@@ -57,7 +57,7 @@ public class VariableElimination {
                     // the node label should be the same for both - the queried node.
                     newFactor = join(factors, queried.getLabel());
                 }
-                newFactor = normalize(newFactor);
+                newFactor.normalize();
             }
         }
         // otherwise just assign the queried node's cpt to newFactor and read its value.

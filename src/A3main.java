@@ -91,7 +91,7 @@ public class A3main {
                 GibbsSampling gs = new GibbsSampling(bn, variable, evidence);
 
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result =  gs.gibbsAsk(2);
+                double result =  gs.gibbsAsk(100);
                 printResult(result);
             }
             break;

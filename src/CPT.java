@@ -54,31 +54,14 @@ public class CPT {
         ArrayList<String> nodeLabelsWithoutCorresponding = new ArrayList<>(nodeLabels);
         nodeLabelsWithoutCorresponding.remove(correspondentNode.getLabel());
         CPT tempCPT = new CPT(this);
-        System.out.println("TEMPCPT"+tempCPT);
+
         // first we need to marginalise the table so that only the own probability remains.
         for (String label : nodeLabelsWithoutCorresponding) {
             tempCPT = ve.marginalise(tempCPT, label);
-            System.out.println("AFTER ITER: "+ tempCPT);
         }
+        tempCPT.normalize(); // normalize values.
 
-        tempCPT.constructAndPrintCPT(true);
-
-//
-//        ArrayList<ArrayList<Integer>> suitableKeys = new ArrayList<>();
-//        // find all the suitable keys - where the value for the corresponding node is equal to the
-//        // passed in value.
-//        for (ArrayList<Integer> key : valuesMap.keySet()) {
-//            if (key.get(index) == value) {
-//                suitableKeys.add(key);
-//            }
-//        }
-//
-//        double valueSummed = 0;
-//        for (ArrayList<Integer> key: suitableKeys) {
-//            valueSummed += valuesMap.get(key);
-//        }
-
-        return  tempCPT.getCPTSingleProb(value);
+        return tempCPT.getCPTSingleProb(value);
     }
 
     public void setNodeLabels(ArrayList<String> nodeLabels) {
@@ -301,7 +284,9 @@ public class CPT {
      * @return
      */
     public void normalize() {
+        // store the normalized values.
         ArrayList<Double> normalizedValues = new ArrayList<>();
+
         double trueValue = getCPTSingleProb(1);
         double falseValue = getCPTSingleProb(0);
         double sumValue = trueValue + falseValue;
