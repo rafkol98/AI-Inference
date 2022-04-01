@@ -10,6 +10,9 @@ public class VariableElimination {
     ArrayList<String[]> evidences;
 
 
+    public VariableElimination() {
+    }
+
     public VariableElimination(BayesianNetwork bn, String queried, String[] order) {
         this.bn = bn;
         this.queried = bn.getNode(queried);
@@ -281,7 +284,7 @@ public class VariableElimination {
 
 
     //TODO: improve!
-    private CPT join(ArrayList<CPT> toSumOut, String label) {
+    public CPT join(ArrayList<CPT> toSumOut, String label) {
         CPT newFactor = new CPT(label);
         CPT first = toSumOut.get(0);
         // Join iteratively (two factors at a time).

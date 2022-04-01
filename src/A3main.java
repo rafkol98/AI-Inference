@@ -79,6 +79,22 @@ public class A3main {
                 printResult(result);
             }
             break;
+
+            case "P5": {
+                //construct the network in args[1]
+                BayesianNetwork bn = getNetwork(args[1]);
+                System.out.println("pri: "+bn.getNodes());
+                String[] query = getQueriedNode(sc);
+                String variable = query[0];
+                String value = query[1];
+                ArrayList<String[]> evidence = getEvidence(sc);
+                GibbsSampling gs = new GibbsSampling(bn, variable, evidence);
+
+                // execute query of p(variable=value|evidence) with given order of elimination
+                double result =  gs.gibbsAsk(2);
+                printResult(result);
+            }
+            break;
         }
         sc.close();
     }

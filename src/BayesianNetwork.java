@@ -99,4 +99,29 @@ public class BayesianNetwork {
         return Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
+
+    //TODO
+//    public String[] greedyMinEdgesSearch(String queriedLabel) {
+//        Node queried = getNode(queriedLabel); // get queried node.
+//        ArrayList<Node> unmarked = new ArrayList<>(nodes);
+//        ArrayList<Node> marked = new ArrayList<>();
+//        ArrayList<String> order = new ArrayList<>(); // store the order.
+//
+//        // the queried node is the starting node.
+//        marked.add(queried);
+//
+//        for (int i = 0; i < nodes.size(); i++) {
+//            Node labelWithMaxMarkedNeighbours = findMaximumNumberOfMarkedNeighbours(unmarked, marked);
+//            order.add(labelWithMaxMarkedNeighbours.getLabel());
+//            unmarked.remove(labelWithMaxMarkedNeighbours); // remove label with maximum number of marked neighbours from unmarked.
+//            marked.add(labelWithMaxMarkedNeighbours); // add label to the marked list.
+//        }
+//        Collections.reverse(order); // reverse order
+//        order.remove(queried.getLabel()); // remove queried label from the order list.
+//
+//        return order.toArray(new String[order.size()]);
+//    }
+
+
+
 }

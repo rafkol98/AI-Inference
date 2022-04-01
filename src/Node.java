@@ -43,6 +43,16 @@ public class Node {
         children.add(child);
     }
 
+    public ArrayList<Node> getCoParents() {
+        ArrayList<Node> coParents = new ArrayList<>();
+        for (Node child : children) {
+            ArrayList<Node> childParents = new ArrayList<>(child.getParents()); // make a copy of the child's parents.
+            childParents.remove(this); // remove current node from te childParents list - as we only want the co-parents.
+            coParents.addAll(childParents);
+        }
+        return coParents;
+    }
+
     /**
      * Get all the neighbours (parents and childrens) of the node.
      * @return
@@ -52,6 +62,7 @@ public class Node {
         // add both children and parents as all neighbours of the node.
         allNeighbours.addAll(children);
         allNeighbours.addAll(parents);
+        allNeighbours.addAll(getCoParents()); // add all the co-parents.
         return allNeighbours;
     }
 
