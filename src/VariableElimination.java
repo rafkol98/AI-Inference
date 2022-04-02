@@ -1,7 +1,9 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * Create a new Variable Elimination run.
+ */
 public class VariableElimination {
 
     // Initialise inputs.
@@ -71,7 +73,6 @@ public class VariableElimination {
         return newFactor.getCPTSingleProb(truthLooking);
     }
 
-
     /**
      *
      * @param factors
@@ -85,11 +86,10 @@ public class VariableElimination {
         }
     }
 
-
-
     /**
      * Prunes all the irrelevant variables according to our task. If the evidence flag is true, then it deletes
-     * ancestors of the evidences.
+     * ancestors of the evidences. Otherwise it just removes every variable that is not an ancestor of the queried
+     * variable.
      *
      * @param evidence
      */
@@ -136,7 +136,7 @@ public class VariableElimination {
     }
 
     /**
-     * Create a set of factors.
+     * Create a set of factors for every node in the Bayesian network that is included in the order or is the queried variable.
      *
      * @return
      */
@@ -321,5 +321,4 @@ public class VariableElimination {
         Collections.reverse(combined);
         return combined;
     }
-
 }

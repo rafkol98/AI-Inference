@@ -155,7 +155,9 @@ public class CPT {
     }
 
     /**
-     * Set CPT values to zeros according to evidence.
+     * //TODO: this might be wrong, shouldn't i get the index of it and then do it??
+     * When evidence factor is equal to true then set all values of the CPT in EvFactor where E = F to zero,
+     * and vice versa.
      * @param changeTrueVals if true sets all the false values to zero, and
      *                       vice versa.
      */
