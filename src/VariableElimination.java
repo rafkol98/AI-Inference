@@ -204,11 +204,16 @@ public class VariableElimination {
         return null;
     }
 
-    // remove variable.
-    public CPT marginalise(CPT newFactor, String label) {
+    /**
+     * Marginalise a CPT, removing the label.
+     * @param newCPT
+     * @param label
+     * @return
+     */
+    public CPT marginalise(CPT newCPT, String label) {
         CPT marginalised = new CPT();
         // set node labels everything except current label.
-        ArrayList<String> nodeLabels = new ArrayList<>(newFactor.getNodeLabels());
+        ArrayList<String> nodeLabels = new ArrayList<>(newCPT.getNodeLabels());
         int index = nodeLabels.indexOf(label);
 
         if (nodeLabels.size() > 1) {
@@ -218,14 +223,17 @@ public class VariableElimination {
             // add the marginalised values.
             ArrayList<Double> marginalisedFactorValues = new ArrayList<>();
             ArrayList<ArrayList<Integer>> truthAlreadyTried = new ArrayList<>();
-            for (int i = 0; i < newFactor.getCptValues().size(); i++) {
-                ArrayList<Integer> truthValuesForTrue = newFactor.getCombinations().get(i);
-                ArrayList<Integer> truthValuesForFalse = newFactor.getCombinations().get(i);
+
+            // iterate through the CPT values.
+            for (int i = 0; i < newCPT.getCptValues().size(); i++) {
+                ArrayList<Integer> truthValuesForTrue = newCPT.getCombinations().get(i);
+                ArrayList<Integer> truthValuesForFalse = newCPT.getCombinations().get(i);
                 truthValuesForTrue.set(index, 1); // set value for true.
                 truthValuesForFalse.set(index, 0); // set value for false.
 
+                // if truth was not already tried for both true and false combinations, then use them.
                 if (!truthAlreadyTried.contains(truthValuesForTrue) && !truthAlreadyTried.contains(truthValuesForFalse)) {
-                    double value = newFactor.getCPTProbability(truthValuesForTrue) + newFactor.getCPTProbability(truthValuesForFalse);
+                    double value = newCPT.getCPTProbability(truthValuesForTrue) + newCPT.getCPTProbability(truthValuesForFalse);
                     marginalisedFactorValues.add(value);
                     truthAlreadyTried.add(truthValuesForTrue);
                     truthAlreadyTried.add(truthValuesForFalse);
@@ -243,32 +251,58 @@ public class VariableElimination {
     }
 
 
+    /**
+     * Get all the variables in both CPTs.
+     * @param first the first CPT.
+     * @param second the second CPT.
+     * @return common variables.
+     */
     private ArrayList<String> variablesBoth(CPT first, CPT second) {
         // return common elements in first and second CPTs.
         return (ArrayList<String>) first.getNodeLabels().stream().filter(second.getNodeLabels()::contains).collect(Collectors.toList());
     }
 
+    /**
+     * Get variables present in the first CPT but not in the second.
+     * @param first the first CPT.
+     * @param second the second CPT.
+     * @return the variables not in the second CPT.
+     */
     private ArrayList<String> variablesNotInSecond(CPT first, CPT second) {
         return (ArrayList<String>) first.getNodeLabels().stream()
                 .filter(element -> !second.getNodeLabels().contains(element))
                 .collect(Collectors.toList());
     }
 
-
-    //TODO: improve
-    private ArrayList<Integer> getFactorTruthCombination(ArrayList<Integer> truthCombination, CPT newFactor, CPT factor) {
-        ArrayList<Integer> factorTruth = new ArrayList<>();
-        for (int i = 0; i < factor.getNodeLabels().size(); i++) {
-            for (int j = 0; j < newFactor.getNodeLabels().size(); j++) {
-                if (newFactor.getNodeLabels().get(j).equalsIgnoreCase(factor.getNodeLabels().get(i))) {
-                    factorTruth.add(truthCombination.get(j));
+    /**
+     * Get truth combinations of CPTs between two CPTs.
+     * @param truthCombination the truth combinations examined.
+     * @param newCPT the new cpt.
+     * @param cpt the previous cpt.
+     * @return an arraylist containing all the possible CPT truth combinations.
+     */
+    private ArrayList<Integer> getCPTTruthCombination(ArrayList<Integer> truthCombination, CPT newCPT, CPT cpt) {
+        ArrayList<Integer> combinations = new ArrayList<>();
+        // iterate through all the node labels of both cpt and new cpt.
+        for (int i = 0; i < cpt.getNodeLabels().size(); i++) {
+            for (int x = 0; x < newCPT.getNodeLabels().size(); x++) {
+                // if two labels are equal, then add the value of truth combination in the combinations.
+                if (newCPT.getNodeLabels().get(x).equalsIgnoreCase(cpt.getNodeLabels().get(i))) {
+                    combinations.add(truthCombination.get(x));
                 }
 
             }
         }
-        return factorTruth;
+        return combinations;
     }
 
+    /**
+     * The JoinMarginalise operation creates a new CPT with all
+     * variables in factors of ToSumOut but without Y/label
+     * @param toSumOut the factors/cpts to sumout.
+     * @param label the label to marginalise.
+     * @return
+     */
     public CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
         numberOfOperations++; // increment number of operations counter.
 
@@ -283,8 +317,12 @@ public class VariableElimination {
         return marginalisedNewFactor;
     }
 
-
-    //TODO: improve!
+    /**
+     * Join two CPTs together.
+     * @param toSumOut the variables to sum out.
+     * @param label the label to use for the new CPT.
+     * @return the new joined CPT>
+     */
     private CPT join(ArrayList<CPT> toSumOut, String label) {
         CPT newCPT = new CPT(label);
         CPT first = toSumOut.get(0);
@@ -296,17 +334,24 @@ public class VariableElimination {
             // Truth combinations to calculate.
             newCPT.setNodeLabels(combined);
 
-            ArrayList<Double> newFactorValues = calculateNewCPTValues(newCPT, first, second);
+            ArrayList<Double> newCPTValues = calculateNewCPTValues(newCPT, first, second);
 
             // reverse values orders.
-            Collections.reverse(newFactorValues);
-            newCPT.addCPTvalues(newFactorValues);
+            Collections.reverse(newCPTValues);
+            newCPT.addCPTvalues(newCPTValues);
 
             first = new CPT(newCPT); // make a deep copy.
         }
         return newCPT;
     }
 
+    /**
+     * Calculate new CPT values after joining two CPTs together.
+     * @param newCPT the newCPT that holds the addition.
+     * @param first the first cpt.
+     * @param second the second cpt.
+     * @return the new values to be added.
+     */
     public ArrayList<Double> calculateNewCPTValues(CPT newCPT, CPT first, CPT second) {
         // Get all the truth values combinations.
         ArrayList<ArrayList<Integer>> newFactorTruths = newCPT.getCombinations();
@@ -315,8 +360,8 @@ public class VariableElimination {
         // Iterate through the new factors' truth combinations and calculate their values.
         for (int x = 0; x < newFactorTruths.size(); x++) {
             ArrayList<Integer> truthCombination = newFactorTruths.get(x);
-            ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newCPT, first);
-            ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newCPT, second);
+            ArrayList<Integer> f1Truth = getCPTTruthCombination(truthCombination, newCPT, first);
+            ArrayList<Integer> f2Truth = getCPTTruthCombination(truthCombination, newCPT, second);
 
             double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
             newCPTValues.add(value);

@@ -81,7 +81,6 @@ public class Ordering {
         for (int i = 0; i < nodes.size(); i++) {
             Node labelWithMinNeighbours = findNodeWithMinimumNeighbours(unmarked, marked);
             order.add(labelWithMinNeighbours.getLabel());
-            System.out.println("NODE: "+ labelWithMinNeighbours.getLabel());
             unmarked.remove(labelWithMinNeighbours); // remove label with maximum number of marked neighbours from unmarked.
             marked.add(labelWithMinNeighbours); // add label to the marked list.
 

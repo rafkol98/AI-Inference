@@ -46,7 +46,6 @@ public class BayesianNetwork {
     }
 
 
-
     /**
      * Get a node in the bayesian network given its label.
      * @param label the label of the node.

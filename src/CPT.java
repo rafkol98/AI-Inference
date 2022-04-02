@@ -6,6 +6,7 @@ import java.util.stream.DoubleStream;
 
 /**
  * Create a new CPT table.
+ *
  * @author: 210017984
  */
 public class CPT {
@@ -41,6 +42,7 @@ public class CPT {
     /**
      * Create a new CPT given a node label. Used to create temporary CPTs
      * in the join operation.
+     *
      * @param nodeGivenLabel a node's label.
      */
     public CPT(String nodeGivenLabel) {
@@ -51,6 +53,7 @@ public class CPT {
 
     /**
      * Create a new CPT associated belonging to a given node.
+     *
      * @param correspondingNode the node that the CPT table will
      *                          belong to.
      */
@@ -62,15 +65,8 @@ public class CPT {
     }
 
     /**
-     * Set node labels to the CPT.
-     * @param nodeLabels the node labels of the CPT
-     */
-    public void setNodeLabels(ArrayList<String> nodeLabels) {
-        this.nodeLabels = nodeLabels;
-    }
-
-    /**
      * Get corresponding (owning) node of the CPT.
+     *
      * @return corresponding node of the CPT.
      */
     public Node getCorrespondingNode() {
@@ -79,6 +75,7 @@ public class CPT {
 
     /**
      * Get CPT's node labels.
+     *
      * @return the labels of the CPT.
      */
     public ArrayList<String> getNodeLabels() {
@@ -86,7 +83,17 @@ public class CPT {
     }
 
     /**
+     * Set node labels to the CPT.
+     *
+     * @param nodeLabels the node labels of the CPT
+     */
+    public void setNodeLabels(ArrayList<String> nodeLabels) {
+        this.nodeLabels = nodeLabels;
+    }
+
+    /**
      * Get CPT's values.
+     *
      * @return the values of the CPT.
      */
     public ArrayList<Double> getCptValues() {
@@ -96,6 +103,7 @@ public class CPT {
     /**
      * Add CPT values both in the arraylist and the truth - value map. Used mainly
      * when creating a new Bayesian Network - add multiple values at once without ArrayList.
+     *
      * @param values the values to be added to the CPT.
      */
     public void addCPTvalues(double... values) {
@@ -113,6 +121,7 @@ public class CPT {
 
     /**
      * Add CPT values in the form of an ArrayList both in the arraylist and the truth - value map.
+     *
      * @param values the values to be added to the CPT.
      */
     public void addCPTvalues(ArrayList<Double> values) {
@@ -122,11 +131,12 @@ public class CPT {
 
     /**
      * Update the CPT values both in the arraylist and the map.
+     *
      * @param newValues the new values to be updated.
      */
     public void updateCPTvalues(ArrayList<Double> newValues) {
-        for (int i=0; i<newValues.size(); i++) {
-            cptValues.set(i,newValues.get(i));
+        for (int i = 0; i < newValues.size(); i++) {
+            cptValues.set(i, newValues.get(i));
         }
         populateMap();
     }
@@ -134,6 +144,7 @@ public class CPT {
     /**
      * Get a seeked truth value for the corresponding's node marginalised
      * CPT table - this is only used for gibbs sampling.
+     *
      * @param value the value we want - can be either 1 or 0 (binary).
      * @return the CPT probability.
      */
@@ -155,9 +166,9 @@ public class CPT {
     }
 
     /**
-     * //TODO: this might be wrong, shouldn't i get the index of it and then do it??
      * When evidence factor is equal to true then set all values of the CPT in EvFactor where E = F to zero,
      * and vice versa.
+     *
      * @param changeTrueVals if true sets all the false values to zero, and
      *                       vice versa.
      */
@@ -208,20 +219,20 @@ public class CPT {
     }
 
     /**
-     * Print the CPT.
+     * Construct and print the CPT.
+     *
+     * @param print whether to print the table.
      */
-    //TODO: redo the whole CPT printing. MAKE IT ONLY PRINTING
     public void constructAndPrintCPT(boolean print) {
         // Get the number of nodes in this CPT.
         int numberNodes = nodeLabels.size();
         int size = (int) Math.pow(2, numberNodes);
 
         if (print) {
-            if (cptValues!= null) {
+            if (cptValues != null) {
                 printCPTHead();
             }
         }
-
         // Create truth tables.
         for (int i = 0; i < size; i++) {
             // ArrayList stores all the values for the current column. Used as key for the HashMap
@@ -239,24 +250,24 @@ public class CPT {
                 valuesTableRow.add(Character.getNumericValue(c));
             }
 
-            //TODO: remove this - only useful for debug
             if (cptValues != null) {
                 double nodeValue = cptValues.get(i);
                 if (print) {
-
                     System.out.println("|" + nodeValue); // print node value.
                 }
                 valuesMap.put(valuesTableRow, nodeValue);
             } else {
                 if (print) {
-                   System.out.println("|" + 0);
+                    System.out.println("|" + 0);
                     valuesMap.put(valuesTableRow, 0.0);
                 }
             }
         }
     }
 
-    //TODO: redo the whole CPT printing.
+    /**
+     * Print the head of the CPT>
+     */
     private void printCPTHead() {
         String head = "";
         String parentsStr = "";
@@ -288,6 +299,7 @@ public class CPT {
 
     /**
      * Get a single probability in a CPT with only one variable.
+     *
      * @param truth the value we are looking (1 or 0 - binary).
      * @return
      */
@@ -300,6 +312,7 @@ public class CPT {
     /**
      * Get CPT probability for a combination fo truth values - used when multiple
      * variable combinations in the CPT table.
+     *
      * @param truthValues
      * @return
      */
@@ -316,35 +329,56 @@ public class CPT {
                 '}';
     }
 
-    //TODO: change/improve!!!
+    /**
+     * Get all the combinations of truth values in the CPT.
+     * @return
+     */
     public ArrayList<ArrayList<Integer>> getCombinations() {
-        ArrayList<ArrayList<Integer>> trueValues = new ArrayList<>();
-        //
+        ArrayList<ArrayList<Integer>> truthValues = new ArrayList<>();
+
+        // Get the size of the truth values combinations.
         int size = (int) Math.pow(2, nodeLabels.size());
 
-        // Add empty lists to the list of lists.
+        // Initialise new arraylists.
         for (int c = 0; c < size; c++) {
-            trueValues.add(new ArrayList<>());
+            truthValues.add(new ArrayList<>());
         }
-        int space = size / 2;
-        int prevSpace = size;
-        for (String label : nodeLabels) {
-            int counter = 0;
+
+        // generate the combinations.
+        generateCombinations(size, truthValues);
+
+        return truthValues;
+    }
+
+    /**
+     * Generate all the combinations and place them in an arraylist of arraylists.
+     * @param size the size of the combinations in the truth values table.
+     * @param truthValues the initialised truth values.
+     */
+    private void generateCombinations(int size, ArrayList<ArrayList<Integer>> truthValues) {
+        int locationIndex = size / 2;
+        int prevIndex = size;
+
+        // iterate though the node labels.
+        for (String l : nodeLabels) {
+            int count = 0;
+            // iterate through the size of the possible truth values.
             for (int i = 0; i < size; i++) {
-                if (counter < space) {
-                    trueValues.get(i).add(1);
+                // Add the combinations of zero and ones.
+                if (count < locationIndex) {
+                    truthValues.get(i).add(1);
                 } else {
-                    trueValues.get(i).add(0);
+                    truthValues.get(i).add(0);
                 }
-                counter++;
-                if (counter == prevSpace) {
-                    counter = 0;
+                count++;
+
+                if (count == prevIndex) {
+                    count = 0;
                 }
             }
-            prevSpace = space;
-            space = space / 2;
+            prevIndex = locationIndex;
+            locationIndex = locationIndex/2;
         }
-        return trueValues;
     }
 
     /**
