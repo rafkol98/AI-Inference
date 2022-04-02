@@ -18,8 +18,13 @@ import java.util.Scanner;
 public class A3main {
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
+        String timeFlag = args[2];
+        VariableElimination ve;
+        String value;
+        boolean evidenceFlag;
+
+
 
 
         switch (args[0]) {
@@ -36,12 +41,14 @@ public class A3main {
                 BayesianNetwork bn = getNetwork(args[1]);
                 String[] query=getQueriedNode(sc);
                 String variable = query[0];
-                String value = query[1];
+                value = query[1];
+                evidenceFlag = false;
                 String[] order = getOrder(sc);
                 // execute query of p(variable=value) with given order of elimination
-                VariableElimination ve = new VariableElimination(bn, variable, order);
-                double result = ve.runVE(value, false);
+                ve = new VariableElimination(bn, variable, order);
+                double result = ve.runVE(value, evidenceFlag);
                 printResult(result);
+                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
             }
             break;
 
@@ -50,15 +57,15 @@ public class A3main {
                 BayesianNetwork bn = getNetwork(args[1]);
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
-                String value = query[1];
+                value = query[1];
                 String[] order = getOrder(sc);
                 ArrayList<String[]> evidence = getEvidence(sc);
-                VariableElimination ve = new VariableElimination(bn, variable, order, evidence);
-
+                evidenceFlag = true;
+                ve = new VariableElimination(bn, variable, order, evidence);
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result =  ve.runVE(value, true);
-
+                double result =  ve.runVE(value, evidenceFlag);
                 printResult(result);
+                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
             }
             break;
 
@@ -67,29 +74,28 @@ public class A3main {
                 BayesianNetwork bn = getNetwork(args[1]);
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
-                String value = query[1];
+                value = query[1];
                 String[] order = bn.maximumCardinalitySearch(variable);
                 ArrayList<String[]> evidence = getEvidence(sc);
-                VariableElimination ve = new VariableElimination(bn, variable, order, evidence);
-
+                evidenceFlag = true;
+                ve = new VariableElimination(bn, variable, order, evidence);
                 // execute query of p(variable=value|evidence) with given order of elimination
                 //print the order
                 System.out.println(Arrays.toString(order));
-                double result =  ve.runVE(value, true);
+                double result =  ve.runVE(value, evidenceFlag);
                 printResult(result);
+                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
             }
             break;
 
             case "P5": {
                 //construct the network in args[1]
                 BayesianNetwork bn = getNetwork(args[1]);
-                System.out.println("pri: "+bn.getNodes());
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
-                String value = query[1];
+                value = query[1];
                 ArrayList<String[]> evidence = getEvidence(sc);
                 GibbsSampling gs = new GibbsSampling(bn, variable, evidence);
-
                 // execute query of p(variable=value|evidence) with given order of elimination
                 double result =  gs.gibbsAsk(10000, value);
                 printResult(result);
@@ -97,11 +103,12 @@ public class A3main {
             break;
         }
         sc.close();
+        
+        
     }
 
     //method to obtain the evidence from the user
     private static ArrayList<String[]> getEvidence(Scanner sc) {
-
         System.out.println("Evidence:");
         ArrayList<String[]> evidence = new ArrayList<String[]>();
         String[] line = sc.nextLine().split(" ");
@@ -214,9 +221,66 @@ public class A3main {
                 z.getCpt().addCPTvalues(0.8, 0.2, 0.6, 0.4, 0.3, 0.7, 0.35, 0.65);
                 u.getCpt().addCPTvalues(0.2, 0.8, 0.95, 0.05);
                 break;
-        }
+            case "CNX":
+                // Add nodes.
+                Node iod = bn.addNode("IOD");
+                Node mp = bn.addNode("M");
+                Node h = bn.addNode("H");
+                Node fd = bn.addNode("FD");
+                Node nb = bn.addNode("NB");
+                Node ap = bn.addNode("A");
+                Node at = bn.addNode("AT");
+                Node cl = bn.addNode("CL");
 
+                // Add Edges
+                bn.addEdge(iod, mp);
+                bn.addEdge(mp, fd);
+                bn.addEdge(nb, ap);
+                bn.addEdge(fd, ap);
+                bn.addEdge(h, ap);
+                bn.addEdge(ap, at);
+                bn.addEdge(ap, cl);
+
+                // Add cpt values to nodes.
+                iod.getCpt().addCPTvalues(0.98, 0.02);
+                mp.getCpt().addCPTvalues(0.71429, 0.28571, 0.6, 0.4);
+                h.getCpt().addCPTvalues(0.875, 0.125);
+                nb.getCpt().addCPTvalues(0.85, 0.15);
+                fd.getCpt().addCPTvalues(0.999, 0.001, 0.97, 0.03);
+                ap.getCpt().addCPTvalues(0.998, 0.002, 0.95, 0.05, 0.8, 0.2, 0.75, 0.25, 0.9, 0.1, 0.85, 0.15, 0.7, 0.3, 0.55, 0.45);
+                at.getCpt().addCPTvalues(0.99, 0.01, 0.05, 0.95);
+                cl.getCpt().addCPTvalues(0.05, 0.95, 0.3, 0.7);
+
+                break;
+        }
         return bn;
+    }
+
+    /**
+     * Time and average given number of runs. Used to compare orderings.
+     * @param numberOfRuns
+     * @return
+     */
+    private static void timeAndAverageRuns(String timeFlag, int numberOfRuns, VariableElimination ve, String value, boolean evidence) {
+        if (timeFlag.equalsIgnoreCase("time")) {
+            int totalNumberOfOperations = 0;
+            int totalTruthValuesCalculated = 0;
+            long startTime = System.nanoTime(); // start timer.
+            for (int i = 0; i < numberOfRuns; i++) {
+                double result = ve.runVE(value, evidence);
+                totalNumberOfOperations += ve.getNumberOfOperations();
+                totalTruthValuesCalculated += ve.getTruthValuesCalculated();
+            }
+            long endTime = System.nanoTime();
+            long totalDuration = (endTime - startTime) / 1000;  //divide by 1,000,000 to get microseconds.
+            long averageDuration = totalDuration / numberOfRuns; // get average duration of a run.
+            int averageNumberOfOperations = totalNumberOfOperations / numberOfRuns;
+            int averageTruthValuesCalculated = totalTruthValuesCalculated / numberOfRuns;
+
+            System.out.println("Duration run - Average of 20 runs: "+averageDuration +" µs");
+            System.out.println("Number of joinMarginalise operation - Average of 20 runs: " + averageNumberOfOperations);
+            System.out.println("Truth values calculated counter - Average of 20 runs: " + averageTruthValuesCalculated);
+        }
     }
 
 }

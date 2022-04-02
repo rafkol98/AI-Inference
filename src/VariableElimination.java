@@ -7,11 +7,12 @@ import java.util.stream.Collectors;
 public class VariableElimination {
 
     // Initialise inputs.
-    BayesianNetwork bn;
-    Node queried;
-    ArrayList<String> order;
-    ArrayList<String[]> evidences;
-
+    private BayesianNetwork bn;
+    private Node queried;
+    private ArrayList<String> order;
+    private ArrayList<String[]> evidences;
+    private int numberOfOperations = 0;
+    private int truthValuesCalculated = 0;
 
     public VariableElimination() {
     }
@@ -27,6 +28,22 @@ public class VariableElimination {
         this.queried = bn.getNode(queried);
         this.order = new ArrayList<>(Arrays.asList(order));
         this.evidences = evidences;
+    }
+
+    /**
+     * Get the number of joinMarginalise operations performed.
+     * @return the number of times joinMarginalise was called.
+     */
+    public int getNumberOfOperations() {
+        return numberOfOperations;
+    }
+
+    /**
+     * Get the number of truth values calculated.
+     * @return the number of truth values calculated.
+     */
+    public int getTruthValuesCalculated() {
+        return truthValuesCalculated;
     }
 
     /**
@@ -104,7 +121,6 @@ public class VariableElimination {
                 prune(evNode, ancLabels); // prune order lists based on this evidence ancestors.
             }
         }
-
         order.retainAll(ancLabels); // retain all elements identified as ancestors.
     }
 
@@ -214,6 +230,7 @@ public class VariableElimination {
                     marginalisedFactorValues.add(value);
                     truthAlreadyTried.add(truthValuesForTrue);
                     truthAlreadyTried.add(truthValuesForFalse);
+                    truthValuesCalculated++; // increment counter for truth values calculated.
                 }
 
             }
@@ -254,6 +271,8 @@ public class VariableElimination {
     }
 
     public CPT joinMarginalise(ArrayList<CPT> toSumOut, String label) {
+        numberOfOperations++; // increment number of operations counter.
+
         CPT newFactor;
         if (toSumOut.size() > 1) {
             newFactor = join(toSumOut, label);
@@ -290,6 +309,7 @@ public class VariableElimination {
 
                 double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
                 newFactorValues.add(value);
+                truthValuesCalculated++; // increment counter for truth values calculated.
             }
             // reverse values orders.
             Collections.reverse(newFactorValues);
@@ -297,7 +317,6 @@ public class VariableElimination {
 
             first = new CPT(newFactor); // make a deep copy.
         }
-
         return newFactor;
     }
 
