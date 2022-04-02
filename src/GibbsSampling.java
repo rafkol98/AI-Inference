@@ -2,8 +2,13 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Create a new Gibbs Sampling class.
+ * @author :210017984
+ */
 public class GibbsSampling {
 
+    // initialise variables.
     private ArrayList<String[]> evidences;
     private BayesianNetwork bn;
     private String queried;
@@ -16,6 +21,12 @@ public class GibbsSampling {
         ve = new VariableElimination();
     }
 
+    /**
+     * The gibbsAsk algorithm.
+     * @param samples how many samples to try and generate.
+     * @param value the turth value that we are looking for.
+     * @return the estimated probability.
+     */
     public double gibbsAsk(int samples, String value) {
         // a vector of counts for each value of the queried variable - since binary and only one queried variable, the counts size are equal to 2.
         HashMap<String, ArrayList<Integer>> allValuesAssigned = new HashMap<>();
@@ -54,6 +65,10 @@ public class GibbsSampling {
         return returnVal;
     }
 
+    /**
+     * Get all the non evidences variables.
+     * @return
+     */
     public ArrayList<Node> getNonEvidences() {
         ArrayList<Node> nonEvidences = new ArrayList<>(bn.getNodes()); // initialise all the BN nodes.
         ArrayList<Node> evidencesList = new ArrayList<>();

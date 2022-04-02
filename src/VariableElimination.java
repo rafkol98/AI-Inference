@@ -3,6 +3,7 @@ import java.util.stream.Collectors;
 
 /**
  * Create a new Variable Elimination run.
+ * @author :210017984
  */
 public class VariableElimination {
 
