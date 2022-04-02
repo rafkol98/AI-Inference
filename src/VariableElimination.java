@@ -53,7 +53,6 @@ public class VariableElimination {
      * @return
      */
     public double runVE(String value, boolean evidence) {
-        System.out.println("Mesa"+order);
         pruneIrrelevantVariables(evidence);
         ArrayList<CPT> factors = createSetFactors();
 
@@ -287,7 +286,7 @@ public class VariableElimination {
 
     //TODO: improve!
     private CPT join(ArrayList<CPT> toSumOut, String label) {
-        CPT newFactor = new CPT(label);
+        CPT newCPT = new CPT(label);
         CPT first = toSumOut.get(0);
         // Join iteratively (two factors at a time).
         for (int i = 1; i < toSumOut.size(); i++) {
@@ -295,29 +294,36 @@ public class VariableElimination {
 
             ArrayList<String> combined = getCombined(first, second);
             // Truth combinations to calculate.
-            newFactor.setNodeLabels(combined);
+            newCPT.setNodeLabels(combined);
 
-            // Get all the truth values combinations.
-            ArrayList<ArrayList<Integer>> newFactorTruths = newFactor.getCombinations();
-            ArrayList<Double> newFactorValues = new ArrayList<>();
+            ArrayList<Double> newFactorValues = calculateNewCPTValues(newCPT, first, second);
 
-            // Iterate through the new factors' truth combinations and calculate their values.
-            for (int x = 0; x < newFactorTruths.size(); x++) {
-                ArrayList<Integer> truthCombination = newFactorTruths.get(x);
-                ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newFactor, first);
-                ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newFactor, second);
-
-                double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
-                newFactorValues.add(value);
-                truthValuesCalculated++; // increment counter for truth values calculated.
-            }
             // reverse values orders.
             Collections.reverse(newFactorValues);
-            newFactor.addCPTvalues(newFactorValues);
+            newCPT.addCPTvalues(newFactorValues);
 
-            first = new CPT(newFactor); // make a deep copy.
+            first = new CPT(newCPT); // make a deep copy.
         }
-        return newFactor;
+        return newCPT;
+    }
+
+    public ArrayList<Double> calculateNewCPTValues(CPT newCPT, CPT first, CPT second) {
+        // Get all the truth values combinations.
+        ArrayList<ArrayList<Integer>> newFactorTruths = newCPT.getCombinations();
+        ArrayList<Double> newCPTValues = new ArrayList<>();
+
+        // Iterate through the new factors' truth combinations and calculate their values.
+        for (int x = 0; x < newFactorTruths.size(); x++) {
+            ArrayList<Integer> truthCombination = newFactorTruths.get(x);
+            ArrayList<Integer> f1Truth = getFactorTruthCombination(truthCombination, newCPT, first);
+            ArrayList<Integer> f2Truth = getFactorTruthCombination(truthCombination, newCPT, second);
+
+            double value = first.getCPTProbability(f1Truth) * second.getCPTProbability(f2Truth);
+            newCPTValues.add(value);
+            truthValuesCalculated++; // increment counter for truth values calculated.
+        }
+
+        return newCPTValues;
     }
 
     /**

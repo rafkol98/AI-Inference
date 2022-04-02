@@ -22,11 +22,31 @@ public class A3main {
         VariableElimination ve;
         String value;
         boolean evidenceFlag;
+        boolean greedy = false;
         String detailsFlag = "";
-        if (args.length > 2) {
-            detailsFlag = args[2];
+        // assign details and greedy flag.
+        if (args.length == 3) {
+            if (args[2].equalsIgnoreCase("details")) {
+                detailsFlag = args[2];
+            } else if (args[2].equalsIgnoreCase("greedy")) {
+                greedy = true;
+            }
         }
 
+        // if both are given.
+        if (args.length >= 4) {
+            if (args[2].equalsIgnoreCase("details")) {
+                detailsFlag = args[2];
+            } else if (args[2].equalsIgnoreCase("greedy")) {
+                greedy = true;
+            }
+
+            if (args[3].equalsIgnoreCase("details")) {
+                detailsFlag = args[3];
+            } else if (args[3].equalsIgnoreCase("greedy")) {
+                greedy = true;
+            }
+        }
 
         switch (args[0]) {
             case "P1": {
@@ -76,8 +96,14 @@ public class A3main {
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
                 value = query[1];
-//                String[] order = bn.maximumCardinalitySearch(variable);
-                String[] order = bn.greedyMinEdgesSearch(variable);
+                String[] order;
+                Ordering ordering = new Ordering(bn.getNodes(), bn.getEdges());
+                // decide on ordering strategy.
+                if (greedy) {
+                    order = ordering.greedyMinEdgesSearch(variable);
+                } else {
+                    order = ordering.maximumCardinalitySearch(variable);
+                }
                 System.out.println(Arrays.toString(order));
                 ArrayList<String[]> evidence = getEvidence(sc);
                 evidenceFlag = true;
