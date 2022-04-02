@@ -19,12 +19,13 @@ public class A3main {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        String timeFlag = args[2];
         VariableElimination ve;
         String value;
         boolean evidenceFlag;
-
-
+        String detailsFlag = "";
+        if (args.length > 2) {
+            detailsFlag = args[2];
+        }
 
 
         switch (args[0]) {
@@ -48,7 +49,7 @@ public class A3main {
                 ve = new VariableElimination(bn, variable, order);
                 double result = ve.runVE(value, evidenceFlag);
                 printResult(result);
-                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
+                timeAndAverageRuns(detailsFlag,20,ve,value,evidenceFlag);
             }
             break;
 
@@ -65,7 +66,7 @@ public class A3main {
                 // execute query of p(variable=value|evidence) with given order of elimination
                 double result =  ve.runVE(value, evidenceFlag);
                 printResult(result);
-                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
+                timeAndAverageRuns(detailsFlag,20,ve,value,evidenceFlag);
             }
             break;
 
@@ -75,7 +76,9 @@ public class A3main {
                 String[] query = getQueriedNode(sc);
                 String variable = query[0];
                 value = query[1];
-                String[] order = bn.maximumCardinalitySearch(variable);
+//                String[] order = bn.maximumCardinalitySearch(variable);
+                String[] order = bn.greedyMinEdgesSearch(variable);
+                System.out.println(Arrays.toString(order));
                 ArrayList<String[]> evidence = getEvidence(sc);
                 evidenceFlag = true;
                 ve = new VariableElimination(bn, variable, order, evidence);
@@ -84,7 +87,7 @@ public class A3main {
                 System.out.println(Arrays.toString(order));
                 double result =  ve.runVE(value, evidenceFlag);
                 printResult(result);
-                timeAndAverageRuns(timeFlag,20,ve,value,evidenceFlag);
+                timeAndAverageRuns(detailsFlag,20,ve,value,evidenceFlag);
             }
             break;
 
@@ -97,14 +100,12 @@ public class A3main {
                 ArrayList<String[]> evidence = getEvidence(sc);
                 GibbsSampling gs = new GibbsSampling(bn, variable, evidence);
                 // execute query of p(variable=value|evidence) with given order of elimination
-                double result =  gs.gibbsAsk(10000, value);
+                double result =  gs.gibbsAsk(1000, value);
                 printResult(result);
             }
             break;
         }
         sc.close();
-        
-        
     }
 
     //method to obtain the evidence from the user
@@ -261,8 +262,8 @@ public class A3main {
      * @param numberOfRuns
      * @return
      */
-    private static void timeAndAverageRuns(String timeFlag, int numberOfRuns, VariableElimination ve, String value, boolean evidence) {
-        if (timeFlag.equalsIgnoreCase("time")) {
+    private static void timeAndAverageRuns(String detailsFlag, int numberOfRuns, VariableElimination ve, String value, boolean evidence) {
+        if (detailsFlag.equalsIgnoreCase("details")) {
             int totalNumberOfOperations = 0;
             int totalTruthValuesCalculated = 0;
             long startTime = System.nanoTime(); // start timer.
@@ -282,5 +283,7 @@ public class A3main {
             System.out.println("Truth values calculated counter - Average of 20 runs: " + averageTruthValuesCalculated);
         }
     }
+
+//    private static void
 
 }

@@ -20,29 +20,23 @@ public class GibbsSampling {
         // a vector of counts for each value of the queried variable - since binary and only one queried variable, the counts size are equal to 2.
         HashMap<String, ArrayList<Integer>> allValuesAssigned = new HashMap<>();
         ArrayList<Node> nonEvidences = getNonEvidences();
-//        System.out.println("NON EVIDENCES "+ nonEvidences);
         HashMap<String, Integer> nonEvidenceAssignment = assignNonEvidence(allValuesAssigned, nonEvidences); // initialising some random values by random guess.
-        System.out.println(nonEvidenceAssignment);
+
         for(int i=0; i<samples; i++) {
             // iteratively sample each one of the nodes in the non-evidence set from their FULL conditional (everybody
             // else except itself). Using the previous sample.
             for (Node nonEvidenceNode : nonEvidences) {
-//                System.out.println("Non evidence node: "+ nonEvidenceNode);
                 // Get all CPTs required to look at their full conditional probability.
                 ArrayList<CPT> appropriateCPTs = getAppropriateCPTs(nonEvidences);
                 CPT fullCPT = ve.joinMarginalise(appropriateCPTs, nonEvidenceNode.getLabel());
-//                fullCPT.constructAndPrintCPT(true);
 
                 double probConds = fullCPT.getCPTProbability(getTruthValuesForCondition(nonEvidenceNode, fullCPT,nonEvidenceAssignment));
-//                nonEvidenceNode.getCpt().constructAndPrintCPT(true);
 
                 double postTrue = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(1) * probConds;
                 double postFalse = nonEvidenceNode.getCpt().getCorrespondingNodeTruthValue(0) * probConds;
 
                 double[] normalizedProb = normalizedProbs(postTrue, postFalse);
-//                System.out.println("NORMALIZED PROB: "+normalizedProb);
                 double prediction = Math.random();
-//                System.out.println("DEBUG PREDICTION: "+prediction + " norm prob 0: "+normalizedProb[0]);
                 int sampleValue = prediction <= normalizedProb[0] ? 1 : 0;
                 nonEvidenceAssignment.put(nonEvidenceNode.getLabel(), sampleValue);
                 ArrayList<Integer> valuesSoFar = allValuesAssigned.get(nonEvidenceNode.getLabel());
@@ -52,13 +46,11 @@ public class GibbsSampling {
                 allValuesAssigned.put(nonEvidenceNode.getLabel(), valuesSoFar);
             }
         }
-        System.out.println(allValuesAssigned);
+        // count number of occurences.
         int numberOfOccurences = getNumberOfOccurences(allValuesAssigned, queried, value);
-        System.out.println(numberOfOccurences);
-        System.out.println(samples);
+
 
         double returnVal = (double) numberOfOccurences/ (double) samples;
-        System.out.println(returnVal);
         return returnVal;
     }
 

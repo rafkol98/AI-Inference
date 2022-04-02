@@ -53,6 +53,7 @@ public class VariableElimination {
      * @return
      */
     public double runVE(String value, boolean evidence) {
+        System.out.println("Mesa"+order);
         pruneIrrelevantVariables(evidence);
         ArrayList<CPT> factors = createSetFactors();
 
@@ -130,7 +131,6 @@ public class VariableElimination {
      * @param initialNode the initial node that we search for its ancestors.
      */
     private void prune(Node initialNode, ArrayList<String> ancLabels) {
-
         ancLabels.add(initialNode.getLabel());
 
         Stack<Node> ancestors = new Stack<>();
