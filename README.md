@@ -5,5 +5,5 @@ Bayesian networks are probabilistic graphical models representing a set of rando
 and their conditional dependencies via directed acyclic graphs. They have
 important applications in diagnostic expert systems particularly for medical applications, investigation of faulty systems, and legal domains.
 
-In this practical I developed my own Bayesian Network system for predicting the risk
+In this practical I developed my own Bayesian Network system from scratch, for predicting the risk
 of digital security attacks for a company network.
